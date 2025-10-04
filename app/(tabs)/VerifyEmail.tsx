@@ -19,6 +19,12 @@ export default function VerifyEmail() {
     if (text && idx < 5 && inputs.current[idx + 1]) {
       inputs.current[idx + 1]?.focus();
     }
+    // If all digits are filled, navigate to SignInPage
+    if (newCode.every(d => d.length === 1)) {
+      setTimeout(() => {
+        router.push('/(tabs)/SignInPage');
+      }, 300);
+    }
   };
 
   const handleResend = () => {
@@ -39,6 +45,7 @@ export default function VerifyEmail() {
       <Text style={styles.subtitle}>
         Please enter the verification code <Text style={styles.bold}>we sent to your email address</Text> to complete the verification process.
       </Text>
+
       <View style={styles.codeRow}>
         {code.map((digit, idx) => (
           <TextInput
@@ -62,6 +69,7 @@ export default function VerifyEmail() {
 }
 
 const styles = StyleSheet.create({
+
   container: {
     flex: 1,
     backgroundColor: '#fff',

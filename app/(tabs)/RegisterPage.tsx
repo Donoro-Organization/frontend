@@ -1,9 +1,9 @@
-
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Linking, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Linking, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import config from '../../config/config';
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('');
@@ -13,7 +13,12 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [emailValid, setEmailValid] = useState(true);
   const [passwordValid, setPasswordValid] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
   const router = useRouter();
+
+  const API = config.BACKEND_API_ENDPOINT;
+  console.log('API Endpoint from config:', API);
 
   // Email validation
   const validateEmail = (value: string) => {
@@ -27,14 +32,46 @@ export default function RegisterPage() {
     return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(value);
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
+    // reset server error
+    setServerError(null);
+
     const isEmailValid = validateEmail(email);
-    const isPasswordValid = validatePassword(password);
+    const isPasswordValid = password.length >= 6 && /[A-Za-z]/.test(password) && /\d/.test(password);
     setEmailValid(isEmailValid);
     setPasswordValid(isPasswordValid);
-    if (isEmailValid && isPasswordValid && agree) {
-      // Here you would send the verification code to the user's email
-      router.push('/(tabs)/VerifyEmail');
+
+    if (!(isEmailValid && isPasswordValid && agree)) return;
+
+    // Call backend signup API
+    try {
+      setSubmitting(true);
+      
+      if (!API) {
+        throw new Error('API endpoint not configured');
+      }
+
+      const res = await fetch(`${API}/auth/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok) {
+        // Assume backend will handle sending verification email — proceed to VerifyEmail screen
+        router.push('/(tabs)/VerifyEmail');
+      } else {
+        // show server-provided message when available
+        setServerError((data && (data.message || data.error)) || 'Registration failed. Please try again.');
+      }
+    } catch (err) {
+      setServerError('Network error. Please check your connection and try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -107,9 +144,20 @@ export default function RegisterPage() {
       {!passwordValid && (
         <Text style={styles.errorText}>Password must be at least 6 characters and contain a letter and a number.</Text>
       )}
+      {serverError && (
+        <Text style={[styles.errorText, { marginTop: 6 }]}>{serverError}</Text>
+      )}
       {/* Continue button */}
-      <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
-        <Text style={styles.continueButtonText}>Continue</Text>
+      <TouchableOpacity
+        style={[styles.continueButton, submitting && styles.continueButtonDisabled]}
+        onPress={handleContinue}
+        disabled={submitting}
+      >
+        {submitting ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.continueButtonText}>Continue</Text>
+        )}
       </TouchableOpacity>
       {/* Terms and conditions */}
       <View style={styles.termsRow}>
@@ -190,6 +238,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
     marginBottom: 18,
+  },
+  continueButtonDisabled: {
+    opacity: 0.6,
   },
   continueButtonText: {
     color: '#fff',
