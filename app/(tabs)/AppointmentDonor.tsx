@@ -47,7 +47,7 @@ export default function AppointmentDonor() {
         }} style={styles.backButton}>
           <Image source={require('@/assets/images/back-icon.png')} style={styles.backIcon} />
         </TouchableOpacity>
-        
+
         {/* Progress Indicator */}
         <View style={styles.progressContainer}>
           <View style={styles.progressStep}>
@@ -95,11 +95,11 @@ export default function AppointmentDonor() {
                     <Text style={styles.donorName}>{donor.name}</Text>
                     <Text style={styles.donorRole}>{donor.role}</Text>
                   </View>
-                  <TouchableOpacity onPress={() => router.push(`/(tabs)/DonorProfile/donor${donor.id}`)}>
+                  <TouchableOpacity onPress={() => router.push(`/(tabs)/donor-profile/donor${donor.id}`)}>
                     <Text style={styles.seeProfile}>See Profile</Text>
                   </TouchableOpacity>
                 </View>
-                
+
                 <View style={styles.ratingContainer}>
                   <View style={styles.ratingBadge}>
                     <Text style={styles.ratingText}>{donor.rating}</Text>
@@ -108,14 +108,14 @@ export default function AppointmentDonor() {
                 </View>
               </View>
             </View>
-            
+
             <View style={styles.availabilityRow}>
               <Image source={require('@/assets/images/calendar-icon.png')} style={styles.availabilityIcon} />
               <Text style={styles.availabilityText}>{donor.availability}</Text>
             </View>
           </View>
         ))}
-        
+
         <TouchableOpacity style={styles.seeMoreButton}>
           <Text style={styles.seeMoreText}>See more ⌄</Text>
         </TouchableOpacity>
