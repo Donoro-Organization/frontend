@@ -2,8 +2,8 @@ import 'dotenv/config';
 
 export default {
   expo: {
-    name: "MyDonoro1",
-    slug: "MyDonoro1",
+    name: "Donoro",
+    slug: "Donoro",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",

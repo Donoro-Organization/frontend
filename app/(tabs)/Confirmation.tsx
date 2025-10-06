@@ -43,7 +43,7 @@ export default function Confirmation() {
   const router = useRouter();
   const { donorId, selectedDate, selectedTime } = useLocalSearchParams();
   const donor = donorData[donorId as keyof typeof donorData];
-  
+
   const [note, setNote] = useState('Kindly Be presented 15 minutes earlier.');
 
   if (!donor) return <View style={styles.container}><Text>Donor not found.</Text></View>;
@@ -63,12 +63,12 @@ export default function Confirmation() {
             if (router.canGoBack()) {
               router.back();
             } else {
-              router.push(`/(tabs)/DonorProfile/donor${donorId}`);
+              router.push(`/(tabs)/donor-profile/donor${donorId}`);
             }
           }} style={styles.backButton}>
             <Image source={require('@/assets/images/back-icon.png')} style={styles.backIcon} />
           </TouchableOpacity>
-          
+
           {/* Progress Indicator */}
           <View style={styles.progressContainer}>
             <View style={styles.progressStep}>
