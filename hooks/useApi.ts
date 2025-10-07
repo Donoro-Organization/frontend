@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import config from "@/config/config";
 
 // TODO: Replace with actual token from auth context/storage
-const HARDCODED_JWT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyZjdhN2U2LTVjOWItNDg4Yy04MGJiLTkzMDIzYmUyNjk3ZSIsInJvbGUiOiJkb25vciIsImV4cCI6MTc1OTg2NjU0Mn0.z_M875ZwkBuzgK2F68F5dyCckMkwnhhUYcaomsufnLI";
+const HARDCODED_JWT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijg5NWMyMjAzLTlkNTAtNDFhOS04YWE1LTM4MThhZGU0NjAyMCIsInJvbGUiOiJnZW5lcmFsIiwiZXhwIjoxNzU5OTM0NDk5fQ.ht2ZRZXulaVUxrZUr4bOT26j4BhLO9IwXygLelwvUXE";
 
 interface UseApiOptions {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -38,13 +38,14 @@ export function useApi<T = any>(
 
     try {
       const url = `${config.BACKEND_API_ENDPOINT}${endpoint}`;
-      
+
 
       const requestOptions: RequestInit = {
         method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${HARDCODED_JWT_TOKEN}`,
+          "ngrok-skip-browser-warning": "true",
           ...headers,
         },
       };

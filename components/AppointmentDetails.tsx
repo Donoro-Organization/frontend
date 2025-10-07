@@ -120,6 +120,21 @@ export default function AppointmentDetails({
                     </View>
                 </View>
 
+                {/* Blood Group */}
+                <View style={styles.infoRow}>
+                    <View style={styles.iconContainer}>
+                        <Ionicons name="water" size={24} color="#D32F2F" />
+                    </View>
+                    <View style={styles.infoContent}>
+                        <Text style={styles.infoLabel}>Blood Group Needed</Text>
+                        <View style={styles.bloodGroupContainer}>
+                            <View style={styles.bloodGroupBadge}>
+                                <Text style={styles.bloodGroupText}>{bloodRequest.blood_group}</Text>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+
                 {/* Date & Time */}
                 <View style={styles.infoRow}>
                     <View style={styles.iconContainer}>
@@ -265,6 +280,22 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#222',
         fontWeight: '500',
+    },
+    bloodGroupContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+    bloodGroupBadge: {
+        backgroundColor: '#D32F2F',
+        borderRadius: 20,
+        paddingHorizontal: 16,
+        paddingVertical: 6,
+    },
+    bloodGroupText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#fff',
     },
     dateTimeContainer: {
         gap: 8,
