@@ -10,7 +10,7 @@ import {
     Alert,
     Modal,
 } from 'react-native';
-import { useApi, apiCall } from '@/hooks/useApi';
+import { useAPI, apiCall } from '@/hooks/useAPI';
 import {
     InvitationStatus,
     ApiResponse,
@@ -25,13 +25,13 @@ import AcceptedInvitationCard from './AcceptedInvitationCard';
 import CompletedInvitationCard from './CompletedInvitationCard';
 import CancelledInvitationCard from './CancelledInvitationCard';
 import AppointmentDetails from './AppointmentDetails';
+import { getUserId } from '@/utils/storage';
 
 // Set to true to use mock data instead of API
 const USE_MOCK_DATA = true;
 
 type StatusTab = 'accepted' | 'pending' | 'completed' | 'cancelled';
 
-const DONOR_USER_ID = '12f7a7e6-5c9b-488c-80bb-93023be2697e'; // Example donor user ID
 
 // Mock data for each status
 const MOCK_DATA: Record<StatusTab, DonorInvitation[]> = {
@@ -397,6 +397,16 @@ export default function DonorAppointments() {
     const [mockInvitations, setMockInvitations] = useState(MOCK_DATA);
     const [selectedInvitation, setSelectedInvitation] = useState<DonorInvitation | null>(null);
     const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+    const [donorUserId, setDonorUserId] = useState<string | null>(null);
+
+    // Load user ID on mount
+    React.useEffect(() => {
+        const loadUserId = async () => {
+            const id = await getUserId();
+            setDonorUserId(id);
+        };
+        loadUserId();
+    }, []);
 
     // Map status tab to API enum
     const getInvitationStatus = (tab: StatusTab): InvitationStatus => {
@@ -410,9 +420,9 @@ export default function DonorAppointments() {
     };
 
     // Fetch invitations based on active tab
-    const { data, loading, error, refetch } = useApi<ApiResponse<PaginatedInvitationsResponse>>(
-        `/blood-requests/donor/${DONOR_USER_ID}/invitations?invitation_status=${getInvitationStatus(activeTab)}&page=1&limit=20`,
-        { enabled: !USE_MOCK_DATA }
+    const { data, loading, error, refetch } = useAPI<ApiResponse<PaginatedInvitationsResponse>>(
+        `/blood-requests/donor/${donorUserId || 'pending'}/invitations?invitation_status=${getInvitationStatus(activeTab)}&page=1&limit=20`,
+        { enabled: !USE_MOCK_DATA && !!donorUserId }
     );
 
     const invitations = USE_MOCK_DATA
@@ -457,10 +467,6 @@ export default function DonorAppointments() {
                 `/blood-requests/invitation/${invitationId}/accept`,
                 {
                     method: 'PUT',
-                    headers: {
-                        // Add auth token here
-                        // 'Authorization': `Bearer ${token}`
-                    },
                 }
             );
 
@@ -504,9 +510,6 @@ export default function DonorAppointments() {
                                 `/blood-requests/invitation/${invitationId}/reject`,
                                 {
                                     method: 'PUT',
-                                    headers: {
-                                        // Add auth token here
-                                    },
                                 }
                             );
 

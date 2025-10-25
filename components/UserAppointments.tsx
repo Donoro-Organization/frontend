@@ -10,7 +10,7 @@ import {
     Alert,
     Modal,
 } from 'react-native';
-import { useApi, apiCall } from '@/hooks/useApi';
+import { useAPI, apiCall } from '@/hooks/useAPI';
 import {
     BloodRequestStatus,
     ApiResponse,
@@ -22,20 +22,19 @@ import AcceptedRequestCard from './AcceptedRequestCard';
 import CompletedRequestCard from './CompletedRequestCard';
 import CancelledRequestCard from './CancelledRequestCard';
 import RequestDetails from './RequestDetails';
+import { getUserId } from '@/utils/storage';
 
 // Set to true to use mock data instead of API
 const USE_MOCK_DATA = false;
 
 type StatusTab = 'accepted' | 'pending' | 'completed' | 'cancelled';
 
-const USER_ID = '895c2203-9d50-41a9-8aa5-3818ade46020'; // Replace with actual user ID from auth
-
 // Mock blood request data
 const MOCK_DATA: Record<StatusTab, any[]> = {
     pending: [
         {
             id: '1',
-            user_id: USER_ID,
+            user_id: 12345,
             blood_group: BloodGroup.A_POSITIVE,
             patient_condition: 'Emergency surgery needed',
             location: 'Dhaka Medical College Hospital',
@@ -50,7 +49,7 @@ const MOCK_DATA: Record<StatusTab, any[]> = {
         },
         {
             id: '2',
-            user_id: USER_ID,
+            user_id: 12345,
             blood_group: BloodGroup.O_NEGATIVE,
             patient_condition: 'Accident victim, critical condition',
             location: 'Square Hospital, Dhaka',
@@ -67,7 +66,7 @@ const MOCK_DATA: Record<StatusTab, any[]> = {
     accepted: [
         {
             id: '3',
-            user_id: USER_ID,
+            user_id: 12345,
             blood_group: BloodGroup.B_POSITIVE,
             patient_condition: 'Planned surgery',
             location: 'Apollo Hospital, Dhaka',
@@ -117,7 +116,7 @@ const MOCK_DATA: Record<StatusTab, any[]> = {
     completed: [
         {
             id: '4',
-            user_id: USER_ID,
+            user_id: 12345,
             blood_group: BloodGroup.AB_POSITIVE,
             patient_condition: 'Delivery complication',
             location: 'Holy Family Hospital, Dhaka',
@@ -151,7 +150,7 @@ const MOCK_DATA: Record<StatusTab, any[]> = {
     cancelled: [
         {
             id: '5',
-            user_id: USER_ID,
+            user_id: 12345,
             blood_group: BloodGroup.O_POSITIVE,
             patient_condition: 'Request cancelled by patient',
             location: 'United Hospital, Dhaka',
@@ -173,6 +172,16 @@ export default function UserAppointments() {
     const [mockRequests, setMockRequests] = useState(MOCK_DATA);
     const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
     const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+    const [userID, setUserID] = useState<string | null>(null);
+
+    // Load user ID on mount
+    React.useEffect(() => {
+        const loadUserId = async () => {
+            const id = await getUserId();
+            setUserID(id);
+        };
+        loadUserId();
+    }, []);
 
     // Map status tab to API enum
     const getRequestStatus = (tab: StatusTab): BloodRequestStatus => {
@@ -186,9 +195,9 @@ export default function UserAppointments() {
     };
 
     // Fetch blood requests based on active tab
-    const { data, loading, error, refetch } = useApi<any>(
-        `/blood-requests/user/${USER_ID}?request_status=${getRequestStatus(activeTab)}&page=1&limit=20`,
-        { enabled: !USE_MOCK_DATA }
+    const { data, loading, error, refetch } = useAPI<any>(
+        `/blood-requests/user/${userID}?request_status=${getRequestStatus(activeTab)}&page=1&limit=20`,
+        { enabled: !USE_MOCK_DATA && !!userID }
     );
 
     const requests = USE_MOCK_DATA

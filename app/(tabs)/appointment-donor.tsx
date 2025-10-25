@@ -42,7 +42,7 @@ export default function AppointmentDonor() {
           if (router.canGoBack()) {
             router.back();
           } else {
-            router.push('/(tabs)/HomePage');
+            router.push('/homepage');
           }
         }} style={styles.backButton}>
           <Image source={require('@/assets/images/back-icon.png')} style={styles.backIcon} />
@@ -95,7 +95,7 @@ export default function AppointmentDonor() {
                     <Text style={styles.donorName}>{donor.name}</Text>
                     <Text style={styles.donorRole}>{donor.role}</Text>
                   </View>
-                  <TouchableOpacity onPress={() => router.push(`/(tabs)/donor-profile/donor${donor.id}`)}>
+                  <TouchableOpacity onPress={() => router.push(`/donor-profile/donor${donor.id}`)}>
                     <Text style={styles.seeProfile}>See Profile</Text>
                   </TouchableOpacity>
                 </View>
@@ -134,7 +134,7 @@ export default function AppointmentDonor() {
           </View>
           <Text style={styles.navText}>Inbox</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/(tabs)/HomePage')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/homepage')}>
           <Image source={require('@/assets/images/home-icon.png')} style={styles.navIcon} />
           <Text style={styles.navText}>Home</Text>
         </TouchableOpacity>

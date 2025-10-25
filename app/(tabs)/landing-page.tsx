@@ -11,7 +11,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      router.replace('/(tabs)/CreateAccount');
+      router.replace('/home-page');
     }, 1800);
     return () => clearTimeout(timeout);
   }, [router]);
