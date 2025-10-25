@@ -21,7 +21,7 @@ export default function BecomeDonor() {
   const handleConfirm = () => {
     // Here you would typically validate the form and submit the data
     // For now, let's navigate back to HomePage with a success message
-    router.push('/(tabs)/HomePage');
+    router.push('/homepage');
   };
 
   return (
@@ -33,7 +33,7 @@ export default function BecomeDonor() {
             if (router.canGoBack()) {
               router.back();
             } else {
-              router.push('/(tabs)/HomePage');
+              router.push('/homepage');
             }
           }} style={styles.backButton}>
             <Image source={require('@/assets/images/back-icon.png')} style={styles.backIcon} />

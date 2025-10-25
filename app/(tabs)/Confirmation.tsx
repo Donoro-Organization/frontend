@@ -51,7 +51,7 @@ export default function Confirmation() {
   const handleConfirmAppointment = () => {
     // Here you would typically save the appointment and navigate to appointments page
     // For now, let's navigate to the Appointments page to show the confirmed appointment
-    router.push('/(tabs)/Appointments');
+    router.push('/appointments');
   };
 
   return (
@@ -63,7 +63,7 @@ export default function Confirmation() {
             if (router.canGoBack()) {
               router.back();
             } else {
-              router.push(`/(tabs)/donor-profile/donor${donorId}`);
+              router.push(`/donor-profile/donor${donorId}`);
             }
           }} style={styles.backButton}>
             <Image source={require('@/assets/images/back-icon.png')} style={styles.backIcon} />
@@ -203,7 +203,7 @@ export default function Confirmation() {
           </View>
           <Text style={styles.navText}>Inbox</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/(tabs)/HomePage')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/homepage')}>
           <Image source={require('@/assets/images/home-icon.png')} style={styles.navIcon} />
           <Text style={styles.navText}>Home</Text>
         </TouchableOpacity>

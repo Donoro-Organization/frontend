@@ -11,7 +11,7 @@ export default function HomePage() {
         <View style={styles.headerRow}>
           <Text style={styles.helloText}>Hello, User01</Text>
           <View style={styles.headerIcons}>
-          <TouchableOpacity onPress={() => router.push('/(tabs)/SearchDonor')}>
+          <TouchableOpacity onPress={() => router.push('/search-donor')}>
             <Image source={require('@/assets/images/avatar-icon.png')} style={styles.avatarIcon} />
           </TouchableOpacity>
             <Image source={require('@/assets/images/bell-icon.png')} style={styles.headerIcon} />
@@ -27,7 +27,7 @@ export default function HomePage() {
         </View>
         {/* Facility */}
         <View style={styles.facilityRow}>
-          <TouchableOpacity style={styles.facilityCard} onPress={() => router.push('/(tabs)/BecomeDonor')}>
+          <TouchableOpacity style={styles.facilityCard} onPress={() => router.push('/become-donor')}>
             <View style={styles.facilityIconBox}>
               <Image source={require('@/assets/images/medical-sign.png')} style={styles.facilityIcon} />
             </View>

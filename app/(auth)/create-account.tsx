@@ -13,7 +13,7 @@ export default function CreateAccount() {
         contentFit="contain"
       />
       <Text style={styles.title}>Create your account</Text>
-      <TouchableOpacity style={styles.emailButton} onPress={() => router.push('/(tabs)/RegisterPage')}>
+      <TouchableOpacity style={styles.emailButton} onPress={() => router.push('/register')}>
         <Ionicons name="mail" size={22} color="#fff" style={{ marginRight: 8 }} />
         <Text style={styles.emailButtonText}>Continue with Email</Text>
       </TouchableOpacity>

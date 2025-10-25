@@ -7,7 +7,7 @@ export default function LoadingPage() {
   const router = useRouter();
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.push('/(tabs)/HomePage');
+      router.push('/homePage');
     }, 500);
     return () => clearTimeout(timer);
   }, []);
