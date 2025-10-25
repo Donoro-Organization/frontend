@@ -111,7 +111,7 @@ export function useAPI<T = any>(
   return { data, loading, error, refetch, mutate };
 }
 
-// Helper function for manual API calls 
+// Helper function for manual API calls
 export async function apiCall<T = any>(
   endpoint: string,
   options: UseApiOptions = {}
@@ -126,9 +126,14 @@ export async function apiCall<T = any>(
   const url = `${config.BACKEND_API_ENDPOINT}${endpoint}`;
 
   const requestHeaders: Record<string, string> = {
-    "Content-Type": "application/json",
     ...headers,
   };
+
+  // Only set Content-Type if not FormData (FormData sets its own with boundary)
+  const isFormData = body instanceof FormData;
+  if (!isFormData) {
+    requestHeaders["Content-Type"] = "application/json";
+  }
 
   // Only add Authorization header if required
   if (requiresAuth) {
@@ -144,7 +149,8 @@ export async function apiCall<T = any>(
   };
 
   if (body && method !== "GET") {
-    requestOptions.body = JSON.stringify(body);
+    // Don't stringify FormData, send it as-is
+    requestOptions.body = isFormData ? body : JSON.stringify(body);
   }
 
   const response = await fetch(url, requestOptions);
