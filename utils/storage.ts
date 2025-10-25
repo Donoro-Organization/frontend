@@ -8,6 +8,8 @@ export const STORAGE_KEYS = {
   USER_ROLE: "userRole",
   AUTH_TOKEN: "authToken",
   VERIFICATION_EMAIL: "verificationEmail", // Temporary storage for email during verification
+  RESET_TOKEN: "resetToken", // Temporary token for password reset
+  RESET_EMAIL: "resetEmail", // Email for password reset flow
 } as const;
 
 /**
@@ -149,6 +151,70 @@ export const clearVerificationEmail = async (): Promise<void> => {
 };
 
 /**
+ * Save reset token temporarily
+ */
+export const saveResetToken = async (token: string): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(STORAGE_KEYS.RESET_TOKEN, token);
+    console.log("Reset token saved successfully");
+  } catch (error) {
+    console.error("Error saving reset token:", error);
+    throw error;
+  }
+};
+
+/**
+ * Get reset token
+ */
+export const getResetToken = async (): Promise<string | null> => {
+  try {
+    return await AsyncStorage.getItem(STORAGE_KEYS.RESET_TOKEN);
+  } catch (error) {
+    console.error("Error getting reset token:", error);
+    return null;
+  }
+};
+
+/**
+ * Clear reset token
+ */
+export const clearResetToken = async (): Promise<void> => {
+  try {
+    await AsyncStorage.removeItem(STORAGE_KEYS.RESET_TOKEN);
+    await AsyncStorage.removeItem(STORAGE_KEYS.RESET_EMAIL);
+    console.log("Reset token cleared successfully");
+  } catch (error) {
+    console.error("Error clearing reset token:", error);
+    throw error;
+  }
+};
+
+/**
+ * Save reset email temporarily
+ */
+export const saveResetEmail = async (email: string): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(STORAGE_KEYS.RESET_EMAIL, email);
+    console.log("Reset email saved successfully");
+  } catch (error) {
+    console.error("Error saving reset email:", error);
+    throw error;
+  }
+};
+
+/**
+ * Get reset email
+ */
+export const getResetEmail = async (): Promise<string | null> => {
+  try {
+    return await AsyncStorage.getItem(STORAGE_KEYS.RESET_EMAIL);
+  } catch (error) {
+    console.error("Error getting reset email:", error);
+    return null;
+  }
+};
+
+/**
  * Clear all user data from AsyncStorage (logout)
  */
 export const clearUserData = async (): Promise<void> => {
@@ -158,6 +224,8 @@ export const clearUserData = async (): Promise<void> => {
       STORAGE_KEYS.USER_ROLE,
       STORAGE_KEYS.AUTH_TOKEN,
       STORAGE_KEYS.VERIFICATION_EMAIL,
+      STORAGE_KEYS.RESET_TOKEN,
+      STORAGE_KEYS.RESET_EMAIL,
     ]);
     console.log("User data cleared successfully");
   } catch (error) {

@@ -1,14 +1,17 @@
 import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import React, { useRef, useState, useEffect } from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { Text, Button, ActivityIndicator } from 'react-native-paper';
 import { apiCall } from '@/hooks/useAPI';
-import { getVerificationEmail, clearVerificationEmail } from '@/utils/storage';
+import { getVerificationEmail, clearVerificationEmail, getResetEmail, saveResetToken } from '@/utils/storage';
 import ErrorDialog from '@/components/ErrorDialog';
 
 export default function VerifyEmail() {
+  const params = useLocalSearchParams();
+  const mode = (params.mode as string) || 'signup'; // 'signup' or 'reset'
+
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [email, setEmail] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -25,15 +28,18 @@ export default function VerifyEmail() {
   // Load email from storage on mount
   useEffect(() => {
     const loadEmail = async () => {
-      const storedEmail = await getVerificationEmail();
+      const storedEmail = mode === 'reset'
+        ? await getResetEmail()
+        : await getVerificationEmail();
+
       setEmail(storedEmail);
       if (!storedEmail) {
-        setErrorMessage('No email found. Please sign up again.');
+        setErrorMessage(`No email found. Please ${mode === 'reset' ? 'try password reset' : 'sign up'} again.`);
         setIsErrorVisible(true);
       }
     };
     loadEmail();
-  }, []);
+  }, [mode]);
 
   const handleChange = (text: string, idx: number) => {
     if (text.length > 1) text = text.slice(-1);
@@ -58,14 +64,18 @@ export default function VerifyEmail() {
     }
 
     if (!email) {
-      setErrorMessage('Email not found. Please sign up again.');
+      setErrorMessage(`Email not found. Please ${mode === 'reset' ? 'try password reset' : 'sign up'} again.`);
       setIsErrorVisible(true);
       return;
     }
 
     setIsVerifying(true);
     try {
-      const response = await apiCall('/verifications/verify', {
+      const endpoint = mode === 'reset'
+        ? '/verifications/forget-password/verify'
+        : '/verifications/verify';
+
+      const response = await apiCall(endpoint, {
         method: 'POST',
         body: { email, code: verificationCode },
         requiresAuth: false,
@@ -73,13 +83,24 @@ export default function VerifyEmail() {
 
       if (response.status_code === 200) {
         setVerificationStatus('success');
-        setSuccessMessage('Email verified successfully!');
-        // Clear verification email from storage
-        await clearVerificationEmail();
-        // Navigate to signin after a short delay
-        setTimeout(() => {
-          router.push('/signin');
-        }, 1500);
+
+        if (mode === 'reset') {
+          // For password reset: save token and navigate to reset-password page
+          if (response.data?.reset_token) {
+            await saveResetToken(response.data.reset_token);
+            setSuccessMessage('Code verified! Redirecting...');
+            setTimeout(() => {
+              router.push('/reset-password');
+            }, 1500);
+          }
+        } else {
+          // For email verification: navigate to signin
+          setSuccessMessage('Email verified successfully!');
+          await clearVerificationEmail();
+          setTimeout(() => {
+            router.push('/signin');
+          }, 1500);
+        }
       } else {
         setVerificationStatus('error');
       }
@@ -95,7 +116,7 @@ export default function VerifyEmail() {
 
   const handleResend = async () => {
     if (!email) {
-      setErrorMessage('Email not found. Please sign up again.');
+      setErrorMessage(`Email not found. Please ${mode === 'reset' ? 'try password reset' : 'sign up'} again.`);
       setIsErrorVisible(true);
       return;
     }
@@ -104,7 +125,10 @@ export default function VerifyEmail() {
     try {
       const response = await apiCall('/verifications/send', {
         method: 'POST',
-        body: { email },
+        body: {
+          email,
+          purpose: mode === 'reset' ? 'password_reset' : 'email_verification'
+        },
         requiresAuth: false,
       });
 
@@ -148,11 +172,13 @@ export default function VerifyEmail() {
         style={styles.logo}
         contentFit="contain"
       />
-      <Text variant="headlineMedium" style={styles.title}>Verify your email</Text>
+      <Text variant="headlineMedium" style={styles.title}>
+        {mode === 'reset' ? 'Reset Password' : 'Verify your email'}
+      </Text>
       <Text variant="bodyMedium" style={styles.subtitle}>
         Please enter the verification code{' '}
         <Text style={styles.bold}>we sent to {email || 'your email address'}</Text>{' '}
-        to complete the verification process.
+        to {mode === 'reset' ? 'reset your password' : 'complete the verification process'}.
       </Text>
 
       <View style={styles.codeRow}>

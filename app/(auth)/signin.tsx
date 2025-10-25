@@ -36,11 +36,6 @@ export default function SigninPage() {
                 onSigninError={handleSigninError}
             />
 
-            {/* Server Error Message */}
-            {serverError && (
-                <Text style={styles.errorText}>{serverError}</Text>
-            )}
-
             {/* Social Sign In Divider */}
             <View style={styles.dividerRow}>
                 <View style={styles.divider} />

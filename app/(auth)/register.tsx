@@ -16,7 +16,7 @@ export default function RegisterPage() {
 
   const handleSignupSuccess = (email: string) => {
     // Navigate to verification screen on successful signup
-    router.push('/verify-email');
+    router.push('/verify');
   };
 
   const handleSignupError = (error: string) => {
@@ -41,11 +41,6 @@ export default function RegisterPage() {
         onSignupError={handleSignupError}
         apiEndpoint={API}
       />
-
-      {/* Server Error Message */}
-      {serverError && (
-        <Text style={styles.errorText}>{serverError}</Text>
-      )}
 
       {/* Terms and conditions */}
       <View style={styles.termsRow}>

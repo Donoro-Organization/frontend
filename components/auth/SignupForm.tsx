@@ -66,7 +66,10 @@ export default function SignupForm({ onSignupSuccess, onSignupError, apiEndpoint
             try {
                 await apiCall('/verifications/send', {
                     method: 'POST',
-                    body: { email },
+                    body: {
+                        email,
+                        purpose: 'email_verification'
+                    },
                     requiresAuth: false,
                 });
                 console.log('Verification code sent to:', email);

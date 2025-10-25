@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useAPI } from '@/hooks/useAPI';
 import ErrorDialog from '@/components/ErrorDialog';
 import { saveUserData } from '@/utils/storage';
@@ -11,6 +12,7 @@ interface SigninFormProps {
 }
 
 export default function SigninForm({ onSigninSuccess, onSigninError }: SigninFormProps) {
+    const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -122,7 +124,11 @@ export default function SigninForm({ onSigninSuccess, onSigninError }: SigninFor
             )}
 
             {/* Forgot Password */}
-            <TouchableOpacity style={styles.forgotRow} onPress={() => { }}>
+            <TouchableOpacity
+                style={styles.forgotRow}
+                onPress={() => router.push('/forgot-password')}
+                disabled={submitting}
+            >
                 <Text style={styles.forgotText}>Forgot password?</Text>
             </TouchableOpacity>
 
