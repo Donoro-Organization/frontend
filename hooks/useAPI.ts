@@ -74,7 +74,7 @@ export function useAPI<T = any>(
 
       if (
         !response.ok ||
-        (jsonData.status_code && jsonData.status_code >= 400)
+        (jsonData.status_code && jsonData.status_code >= 400 && jsonData.message)
       ) {
         throw new Error(
           jsonData.message ||
@@ -156,8 +156,7 @@ export async function apiCall<T = any>(
   const response = await fetch(url, requestOptions);
   const jsonData = await response.json();
 
-  // Check if response is not ok OR if backend returned error status_code
-  if (!response.ok || (jsonData.status_code && jsonData.status_code >= 400)) {
+  if (!response.ok || (jsonData.status_code && jsonData.status_code >= 400 && jsonData.message)) {
     throw new Error(
       jsonData.message ||
         jsonData.error ||
