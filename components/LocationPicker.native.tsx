@@ -333,11 +333,14 @@ export default function LocationPicker({
                     longitude: currentPosition.coords.longitude,
                 };
 
+                // Reverse geocode to get a valid address
+                const { name, address } = await resolvePlaceName(coords.latitude, coords.longitude);
+
                 const location: SelectedLocation = {
-                    name: "Current location",
+                    name,
                     latitude: coords.latitude,
                     longitude: coords.longitude,
-                    address: undefined,
+                    address,
                 };
 
                 const nextRegion: Region = {
@@ -350,7 +353,7 @@ export default function LocationPicker({
                 const locationKey = `${coords.latitude.toFixed(7)},${coords.longitude.toFixed(7)}`;
                 lastLocationRef.current = locationKey;
 
-                console.log("Setting initial location:", locationKey);
+                console.log("Setting initial location:", locationKey, "with address:", address);
                 setSelectedLocation(location);
                 setRegion(nextRegion);
                 onLocationSelect(location);
@@ -525,14 +528,8 @@ export default function LocationPicker({
 const styles = StyleSheet.create({
     container: {
         width: "100%",
-        borderRadius: 16,
         overflow: "hidden",
         backgroundColor: "#fff",
-        elevation: 4,
-        shadowColor: "#000",
-        shadowOpacity: 0.1,
-        shadowOffset: { width: 0, height: 8 },
-        shadowRadius: 16,
     },
     containerExpanded: {
         borderRadius: 0,
