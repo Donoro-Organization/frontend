@@ -6,7 +6,7 @@ export default {
     slug: "donoro",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/images/donoroLogo.png",
+    icon: "./assets/images/logo_white.png",
     scheme: "donoro",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
@@ -22,7 +22,7 @@ export default {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/images/donoroLogo.png",
+        foregroundImage: "./assets/images/logo_white.png",
         backgroundColor: "#ffffff",
       },
       package: "com.android.donoro",
