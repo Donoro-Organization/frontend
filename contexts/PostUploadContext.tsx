@@ -5,11 +5,12 @@ export interface UploadingPost {
     totalImages: number;
     uploadedImages: number;
     status: 'uploading' | 'completed' | 'failed';
+    isEdit?: boolean;
 }
 
 interface PostUploadContextType {
     uploadingPosts: Map<string, UploadingPost>;
-    startUpload: (postId: string, totalImages: number) => void;
+    startUpload: (postId: string, totalImages: number, isEdit?: boolean) => void;
     updateProgress: (postId: string, uploadedImages: number) => void;
     completeUpload: (postId: string, onComplete?: () => void) => void;
     failUpload: (postId: string) => void;
@@ -21,8 +22,8 @@ const PostUploadContext = createContext<PostUploadContextType | undefined>(undef
 export const PostUploadProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [uploadingPosts, setUploadingPosts] = useState<Map<string, UploadingPost>>(new Map());
 
-    const startUpload = useCallback((postId: string, totalImages: number) => {
-        console.log('PostUploadContext: Starting upload for post', postId, 'with', totalImages, 'images');
+    const startUpload = useCallback((postId: string, totalImages: number, isEdit: boolean = false) => {
+        console.log('PostUploadContext: Starting upload for post', postId, 'with', totalImages, 'images', isEdit ? '(edit)' : '(new)');
         setUploadingPosts(prev => {
             const newMap = new Map(prev);
             newMap.set(postId, {
@@ -30,6 +31,7 @@ export const PostUploadProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                 totalImages,
                 uploadedImages: 0,
                 status: 'uploading',
+                isEdit,
             });
             console.log('PostUploadContext: Updated map size:', newMap.size);
             return newMap;

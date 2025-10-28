@@ -91,14 +91,6 @@ export default function UserProfile({ user, isOwnProfile }: UserProfileProps) {
                     ) : (
                         <>
                             <Button
-                                mode="outlined"
-                                onPress={handleReview}
-                                style={styles.reviewButton}
-                                labelStyle={styles.reviewButtonLabel}
-                            >
-                                Review
-                            </Button>
-                            <Button
                                 mode="contained"
                                 onPress={handleMessage}
                                 style={styles.messageButton}

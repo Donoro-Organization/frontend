@@ -58,7 +58,9 @@ export default function PostCard({
                             <View style={styles.uploadingIconContainer}>
                                 <Feather name="upload-cloud" size={40} color="#D32F2F" />
                             </View>
-                            <Text style={styles.uploadingText}>Uploading post...</Text>
+                            <Text style={styles.uploadingText}>
+                                {(post as PendingPost).uploadProgress?.isEdit ? 'Editing post...' : 'Uploading post...'}
+                            </Text>
                         </>
                     ) : (
                         <>

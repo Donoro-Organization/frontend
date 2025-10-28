@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
     activitySection: {
         backgroundColor: '#FFF',
         borderRadius: 12,
-        padding: 16,
+        padding: 8,
     },
     sectionTitle: {
         fontSize: 18,
