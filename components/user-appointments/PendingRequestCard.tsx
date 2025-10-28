@@ -1,26 +1,21 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { DonorInvitation, BloodGroup } from '@/types/bloodRequest';
+import { BloodGroup, BloodRequestStatus } from '@/types/bloodRequest';
 import { format } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
-import DetailsButton from './DetailsButton';
+import DetailsButton from '../DetailsButton';
 
-interface CancelledInvitationCardProps {
-    invitation: DonorInvitation;
-    onViewDetails: (invitationId: string) => void;
+interface PendingRequestCardProps {
+    request: any;
+    onViewDetails: (requestId: string) => void;
+    onCancel: (requestId: string) => void;
 }
 
-export default function CancelledInvitationCard({
-    invitation,
+export default function PendingRequestCard({
+    request,
     onViewDetails,
-}: CancelledInvitationCardProps) {
-    const bloodRequest = invitation.blood_request;
-    if (!bloodRequest) return null;
-
-    const getBloodGroupIcon = (bloodGroup: BloodGroup): string => {
-        return bloodGroup;
-    };
-
+    onCancel,
+}: PendingRequestCardProps) {
     const getDay = (dateString: string) => {
         try {
             return format(new Date(dateString), 'd');
@@ -51,38 +46,52 @@ export default function CancelledInvitationCard({
             <View style={styles.topSection}>
                 {/* Left: Date Badge */}
                 <View style={styles.dateSection}>
-                    <Text style={styles.dateDay}>{getDay(bloodRequest.required_datetime)}</Text>
-                    <Text style={styles.dateMonth}>{getMonth(bloodRequest.required_datetime)}</Text>
+                    <Text style={styles.dateDay}>{getDay(request.required_datetime)}</Text>
+                    <Text style={styles.dateMonth}>{getMonth(request.required_datetime)}</Text>
                 </View>
 
                 {/* Right: Content Details */}
                 <View style={styles.detailsSection}>
                     <Text style={styles.hospitalName} numberOfLines={1}>
-                        {bloodRequest.location}
+                        {request.location}
                     </Text>
                     <Text style={styles.condition} numberOfLines={1}>
-                        {bloodRequest.patient_condition || 'Blood needed'}
+                        {request.patient_condition || 'Blood needed'}
                     </Text>
 
                     {/* Blood Type and Time Row */}
                     <View style={styles.infoRow}>
                         <View style={styles.bloodBadge}>
-                            <Text style={styles.bloodText}>{getBloodGroupIcon(bloodRequest.blood_group)}</Text>
+                            <Text style={styles.bloodText}>{request.blood_group}</Text>
                         </View>
                         <View style={styles.timeContainer}>
                             <Ionicons name="time-outline" size={16} color="#666" />
-                            <Text style={styles.timeText}>{getTime(bloodRequest.required_datetime)}</Text>
+                            <Text style={styles.timeText}>{getTime(request.required_datetime)}</Text>
                         </View>
                     </View>
                 </View>
             </View>
 
-            {/* Bottom Section: Action Button */}
+            {/* Bottom Section: Action Buttons */}
             <View style={styles.bottomSection}>
-                <DetailsButton
-                    onPress={() => onViewDetails(invitation.id)}
-                    color="#757575"
-                />
+                <View style={styles.buttonRow}>
+                    <DetailsButton
+                        onPress={() => {
+                            console.log('Details button pressed for request:', request.id);
+                            onViewDetails(request.id);
+                        }}
+                        color="#D32F2F"
+                    />
+                    <DetailsButton
+                        onPress={() => {
+                            console.log('Cancel button pressed for request:', request.id);
+                            onCancel(request.id);
+                        }}
+                        text="Cancel"
+                        variant="outlined"
+                        color="#D32F2F"
+                    />
+                </View>
             </View>
         </View>
     );
@@ -110,7 +119,7 @@ const styles = StyleSheet.create({
         minHeight: 90,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#F5F5F5',
+        backgroundColor: '#FFE8E8',
         borderRadius: 12,
         marginRight: 16,
         paddingVertical: 16,
@@ -119,13 +128,13 @@ const styles = StyleSheet.create({
     dateDay: {
         fontSize: 36,
         fontWeight: 'bold',
-        color: '#757575',
+        color: '#D32F2F',
         lineHeight: 40,
     },
     dateMonth: {
         fontSize: 15,
         fontWeight: '600',
-        color: '#757575',
+        color: '#D32F2F',
         marginTop: 0,
     },
     detailsSection: {
@@ -134,6 +143,10 @@ const styles = StyleSheet.create({
     },
     bottomSection: {
         width: '100%',
+    },
+    buttonRow: {
+        flexDirection: 'column',
+        gap: 12,
     },
     hospitalName: {
         fontSize: 16,

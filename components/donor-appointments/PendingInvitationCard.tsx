@@ -1,21 +1,30 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { BloodGroup, BloodRequestStatus } from '@/types/bloodRequest';
+import { DonorInvitation, BloodGroup } from '@/types/bloodRequest';
 import { format } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
-import DetailsButton from './DetailsButton';
+import DetailsButton from '../DetailsButton';
 
-interface PendingRequestCardProps {
-    request: any;
-    onViewDetails: (requestId: string) => void;
-    onCancel: (requestId: string) => void;
+interface PendingInvitationCardProps {
+    invitation: DonorInvitation;
+    onAccept: (invitationId: string) => void;
+    onReject: (invitationId: string) => void;
+    onViewDetails: (invitationId: string) => void;
 }
 
-export default function PendingRequestCard({
-    request,
+export default function PendingInvitationCard({
+    invitation,
+    onAccept,
+    onReject,
     onViewDetails,
-    onCancel,
-}: PendingRequestCardProps) {
+}: PendingInvitationCardProps) {
+    const bloodRequest = invitation.blood_request;
+    if (!bloodRequest) return null;
+
+    const getBloodGroupIcon = (bloodGroup: BloodGroup): string => {
+        return bloodGroup;
+    };
+
     const getDay = (dateString: string) => {
         try {
             return format(new Date(dateString), 'd');
@@ -46,27 +55,27 @@ export default function PendingRequestCard({
             <View style={styles.topSection}>
                 {/* Left: Date Badge */}
                 <View style={styles.dateSection}>
-                    <Text style={styles.dateDay}>{getDay(request.required_datetime)}</Text>
-                    <Text style={styles.dateMonth}>{getMonth(request.required_datetime)}</Text>
+                    <Text style={styles.dateDay}>{getDay(bloodRequest.required_datetime)}</Text>
+                    <Text style={styles.dateMonth}>{getMonth(bloodRequest.required_datetime)}</Text>
                 </View>
 
                 {/* Right: Content Details */}
                 <View style={styles.detailsSection}>
                     <Text style={styles.hospitalName} numberOfLines={1}>
-                        {request.location}
+                        {bloodRequest.location}
                     </Text>
                     <Text style={styles.condition} numberOfLines={1}>
-                        {request.patient_condition || 'Blood needed'}
+                        {bloodRequest.patient_condition || 'Blood needed'}
                     </Text>
 
                     {/* Blood Type and Time Row */}
                     <View style={styles.infoRow}>
                         <View style={styles.bloodBadge}>
-                            <Text style={styles.bloodText}>{request.blood_group}</Text>
+                            <Text style={styles.bloodText}>{getBloodGroupIcon(bloodRequest.blood_group)}</Text>
                         </View>
                         <View style={styles.timeContainer}>
                             <Ionicons name="time-outline" size={16} color="#666" />
-                            <Text style={styles.timeText}>{getTime(request.required_datetime)}</Text>
+                            <Text style={styles.timeText}>{getTime(bloodRequest.required_datetime)}</Text>
                         </View>
                     </View>
                 </View>
@@ -74,23 +83,26 @@ export default function PendingRequestCard({
 
             {/* Bottom Section: Action Buttons */}
             <View style={styles.bottomSection}>
-                <View style={styles.buttonRow}>
-                    <DetailsButton
-                        onPress={() => {
-                            console.log('Details button pressed for request:', request.id);
-                            onViewDetails(request.id);
-                        }}
-                        color="#D32F2F"
-                    />
-                    <DetailsButton
-                        onPress={() => {
-                            console.log('Cancel button pressed for request:', request.id);
-                            onCancel(request.id);
-                        }}
-                        text="Cancel"
-                        variant="outlined"
-                        color="#D32F2F"
-                    />
+                {/* Details Button - Full Width */}
+                <DetailsButton
+                    onPress={() => onViewDetails(invitation.id)}
+                    color="#D32F2F"
+                />
+
+                {/* Accept and Reject Buttons Row */}
+                <View style={styles.actionButtonRow}>
+                    <TouchableOpacity
+                        style={styles.rejectButton}
+                        onPress={() => onReject(invitation.id)}
+                    >
+                        <Text style={styles.rejectButtonText}>Reject</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.acceptButton}
+                        onPress={() => onAccept(invitation.id)}
+                    >
+                        <Text style={styles.acceptButtonText}>Accept</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
         </View>
@@ -144,10 +156,6 @@ const styles = StyleSheet.create({
     bottomSection: {
         width: '100%',
     },
-    buttonRow: {
-        flexDirection: 'column',
-        gap: 12,
-    },
     hospitalName: {
         fontSize: 16,
         fontWeight: '700',
@@ -186,5 +194,38 @@ const styles = StyleSheet.create({
         color: '#666',
         fontWeight: '500',
         marginLeft: 1,
+    },
+    actionButtonRow: {
+        flexDirection: 'row',
+        gap: 8,
+        marginTop: 8,
+    },
+    rejectButton: {
+        flex: 1,
+        paddingVertical: 10,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#D32F2F',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#fff',
+    },
+    rejectButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#D32F2F',
+    },
+    acceptButton: {
+        flex: 1,
+        paddingVertical: 10,
+        borderRadius: 8,
+        backgroundColor: '#D32F2F',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    acceptButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#fff',
     },
 });

@@ -3,21 +3,17 @@ import { View, Text, StyleSheet } from 'react-native';
 import { BloodGroup } from '@/types/bloodRequest';
 import { format } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
-import DetailsButton from './DetailsButton';
+import DetailsButton from '../DetailsButton';
 
-interface AcceptedRequestCardProps {
+interface CancelledRequestCardProps {
     request: any;
     onViewDetails: (requestId: string) => void;
-    onCancel: (requestId: string) => void;
-    onMarkComplete: (requestId: string) => void;
 }
 
-export default function AcceptedRequestCard({
+export default function CancelledRequestCard({
     request,
     onViewDetails,
-    onCancel,
-    onMarkComplete,
-}: AcceptedRequestCardProps) {
+}: CancelledRequestCardProps) {
     const getDay = (dateString: string) => {
         try {
             return format(new Date(dateString), 'd');
@@ -41,8 +37,6 @@ export default function AcceptedRequestCard({
             return '';
         }
     };
-
-    const donorCount = request.donors?.length || 0;
 
     return (
         <View style={styles.card}>
@@ -73,46 +67,15 @@ export default function AcceptedRequestCard({
                             <Text style={styles.timeText}>{getTime(request.required_datetime)}</Text>
                         </View>
                     </View>
-
-                    {/* Donor Count */}
-                    <View style={styles.donorCountContainer}>
-                        <Ionicons name="people" size={16} color="#2E7D32" />
-                        <Text style={styles.donorCountText}>
-                            {donorCount} {donorCount === 1 ? 'donor' : 'donors'} accepted
-                        </Text>
-                    </View>
                 </View>
             </View>
 
-            {/* Bottom Section: Action Buttons */}
+            {/* Bottom Section: Action Button */}
             <View style={styles.bottomSection}>
-                <View style={styles.buttonRow}>
-                    <DetailsButton
-                        onPress={() => {
-                            console.log('Details button pressed for request:', request.id);
-                            onViewDetails(request.id);
-                        }}
-                        color="#2E7D32"
-                    />
-                    <DetailsButton
-                        onPress={() => {
-                            console.log('Mark Complete button pressed for request:', request.id);
-                            onMarkComplete(request.id);
-                        }}
-                        text="Mark as Complete"
-                        variant="outlined"
-                        color="#1976D2"
-                    />
-                    <DetailsButton
-                        onPress={() => {
-                            console.log('Cancel button pressed for request:', request.id);
-                            onCancel(request.id);
-                        }}
-                        text="Cancel"
-                        variant="outlined"
-                        color="#D32F2F"
-                    />
-                </View>
+                <DetailsButton
+                    onPress={() => onViewDetails(request.id)}
+                    color="#757575"
+                />
             </View>
         </View>
     );
@@ -140,7 +103,7 @@ const styles = StyleSheet.create({
         minHeight: 90,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#E8F5E9',
+        backgroundColor: '#F5F5F5',
         borderRadius: 12,
         marginRight: 16,
         paddingVertical: 16,
@@ -149,13 +112,13 @@ const styles = StyleSheet.create({
     dateDay: {
         fontSize: 36,
         fontWeight: 'bold',
-        color: '#2E7D32',
+        color: '#757575',
         lineHeight: 40,
     },
     dateMonth: {
         fontSize: 15,
         fontWeight: '600',
-        color: '#2E7D32',
+        color: '#757575',
         marginTop: 0,
     },
     detailsSection: {
@@ -164,10 +127,6 @@ const styles = StyleSheet.create({
     },
     bottomSection: {
         width: '100%',
-    },
-    buttonRow: {
-        flexDirection: 'column',
-        gap: 12,
     },
     hospitalName: {
         fontSize: 16,
@@ -184,7 +143,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: 8,
+        marginBottom: 12,
     },
     bloodBadge: {
         backgroundColor: '#D32F2F',
@@ -207,16 +166,5 @@ const styles = StyleSheet.create({
         color: '#666',
         fontWeight: '500',
         marginLeft: 1,
-    },
-    donorCountContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        marginBottom: 12,
-    },
-    donorCountText: {
-        fontSize: 13,
-        color: '#2E7D32',
-        fontWeight: '600',
     },
 });

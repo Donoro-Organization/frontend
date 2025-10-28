@@ -1,26 +1,23 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { DonorInvitation, BloodGroup } from '@/types/bloodRequest';
+import { View, Text, StyleSheet } from 'react-native';
+import { BloodGroup } from '@/types/bloodRequest';
 import { format } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
-import DetailsButton from './DetailsButton';
+import DetailsButton from '../DetailsButton';
 
-interface AcceptedInvitationCardProps {
-    invitation: DonorInvitation;
-    onViewDetails: (invitationId: string) => void;
+interface AcceptedRequestCardProps {
+    request: any;
+    onViewDetails: (requestId: string) => void;
+    onCancel: (requestId: string) => void;
+    onMarkComplete: (requestId: string) => void;
 }
 
-export default function AcceptedInvitationCard({
-    invitation,
+export default function AcceptedRequestCard({
+    request,
     onViewDetails,
-}: AcceptedInvitationCardProps) {
-    const bloodRequest = invitation.blood_request;
-    if (!bloodRequest) return null;
-
-    const getBloodGroupIcon = (bloodGroup: BloodGroup): string => {
-        return bloodGroup;
-    };
-
+    onCancel,
+    onMarkComplete,
+}: AcceptedRequestCardProps) {
     const getDay = (dateString: string) => {
         try {
             return format(new Date(dateString), 'd');
@@ -45,44 +42,77 @@ export default function AcceptedInvitationCard({
         }
     };
 
+    const donorCount = request.donors?.length || 0;
+
     return (
         <View style={styles.card}>
             {/* Top Section: Date + Content */}
             <View style={styles.topSection}>
                 {/* Left: Date Badge */}
                 <View style={styles.dateSection}>
-                    <Text style={styles.dateDay}>{getDay(bloodRequest.required_datetime)}</Text>
-                    <Text style={styles.dateMonth}>{getMonth(bloodRequest.required_datetime)}</Text>
+                    <Text style={styles.dateDay}>{getDay(request.required_datetime)}</Text>
+                    <Text style={styles.dateMonth}>{getMonth(request.required_datetime)}</Text>
                 </View>
 
                 {/* Right: Content Details */}
                 <View style={styles.detailsSection}>
                     <Text style={styles.hospitalName} numberOfLines={1}>
-                        {bloodRequest.location}
+                        {request.location}
                     </Text>
                     <Text style={styles.condition} numberOfLines={1}>
-                        {bloodRequest.patient_condition || 'Blood needed'}
+                        {request.patient_condition || 'Blood needed'}
                     </Text>
 
                     {/* Blood Type and Time Row */}
                     <View style={styles.infoRow}>
                         <View style={styles.bloodBadge}>
-                            <Text style={styles.bloodText}>{getBloodGroupIcon(bloodRequest.blood_group)}</Text>
+                            <Text style={styles.bloodText}>{request.blood_group}</Text>
                         </View>
                         <View style={styles.timeContainer}>
                             <Ionicons name="time-outline" size={16} color="#666" />
-                            <Text style={styles.timeText}>{getTime(bloodRequest.required_datetime)}</Text>
+                            <Text style={styles.timeText}>{getTime(request.required_datetime)}</Text>
                         </View>
+                    </View>
+
+                    {/* Donor Count */}
+                    <View style={styles.donorCountContainer}>
+                        <Ionicons name="people" size={16} color="#2E7D32" />
+                        <Text style={styles.donorCountText}>
+                            {donorCount} {donorCount === 1 ? 'donor' : 'donors'} accepted
+                        </Text>
                     </View>
                 </View>
             </View>
 
-            {/* Bottom Section: Action Button */}
+            {/* Bottom Section: Action Buttons */}
             <View style={styles.bottomSection}>
-                <DetailsButton
-                    onPress={() => onViewDetails(invitation.id)}
-                    color="#2E7D32"
-                />
+                <View style={styles.buttonRow}>
+                    <DetailsButton
+                        onPress={() => {
+                            console.log('Details button pressed for request:', request.id);
+                            onViewDetails(request.id);
+                        }}
+                        color="#2E7D32"
+                    />
+                    <DetailsButton
+                        onPress={() => {
+                            console.log('Mark Complete button pressed for request:', request.id);
+                            onMarkComplete(request.id);
+                        }}
+                        text="Mark as Complete"
+                        variant="outlined"
+                        color="#1976D2"
+                    />
+                    <DetailsButton
+                        onPress={() => {
+                            console.log('Cancel button pressed for request:', request.id);
+                            onCancel(request.id);
+                        }}
+                        text="Cancel"
+                        variant="outlined"
+                        color="#D32F2F"
+                    />
+                </View>
             </View>
         </View>
     );
@@ -135,6 +165,10 @@ const styles = StyleSheet.create({
     bottomSection: {
         width: '100%',
     },
+    buttonRow: {
+        flexDirection: 'column',
+        gap: 12,
+    },
     hospitalName: {
         fontSize: 16,
         fontWeight: '700',
@@ -150,7 +184,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: 12,
+        marginBottom: 8,
     },
     bloodBadge: {
         backgroundColor: '#D32F2F',
@@ -173,5 +207,16 @@ const styles = StyleSheet.create({
         color: '#666',
         fontWeight: '500',
         marginLeft: 1,
+    },
+    donorCountContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        marginBottom: 12,
+    },
+    donorCountText: {
+        fontSize: 13,
+        color: '#2E7D32',
+        fontWeight: '600',
     },
 });

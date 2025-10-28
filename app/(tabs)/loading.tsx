@@ -7,7 +7,7 @@ export default function LoadingPage() {
   const router = useRouter();
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.push('/homePage');
+      router.push('/home-page');
     }, 500);
     return () => clearTimeout(timer);
   }, []);
@@ -35,10 +35,10 @@ const styles = StyleSheet.create({
     paddingTop: 32,
   },
   logo: {
-    width: 180,
-    height: 80,
-    marginBottom: 8,
-    marginTop: 8,
+    width: 250,
+    height: 50,
+    marginBottom: 24,
+    marginTop: 32,
   },
   subtitle: {
     color: '#888',

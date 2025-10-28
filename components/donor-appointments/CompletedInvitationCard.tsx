@@ -3,21 +3,17 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { DonorInvitation, BloodGroup } from '@/types/bloodRequest';
 import { format } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
-import DetailsButton from './DetailsButton';
+import DetailsButton from '../DetailsButton';
 
-interface PendingInvitationCardProps {
+interface CompletedInvitationCardProps {
     invitation: DonorInvitation;
-    onAccept: (invitationId: string) => void;
-    onReject: (invitationId: string) => void;
     onViewDetails: (invitationId: string) => void;
 }
 
-export default function PendingInvitationCard({
+export default function CompletedInvitationCard({
     invitation,
-    onAccept,
-    onReject,
     onViewDetails,
-}: PendingInvitationCardProps) {
+}: CompletedInvitationCardProps) {
     const bloodRequest = invitation.blood_request;
     if (!bloodRequest) return null;
 
@@ -81,29 +77,12 @@ export default function PendingInvitationCard({
                 </View>
             </View>
 
-            {/* Bottom Section: Action Buttons */}
+            {/* Bottom Section: Action Button */}
             <View style={styles.bottomSection}>
-                {/* Details Button - Full Width */}
                 <DetailsButton
                     onPress={() => onViewDetails(invitation.id)}
-                    color="#D32F2F"
+                    color="#1976D2"
                 />
-
-                {/* Accept and Reject Buttons Row */}
-                <View style={styles.actionButtonRow}>
-                    <TouchableOpacity
-                        style={styles.rejectButton}
-                        onPress={() => onReject(invitation.id)}
-                    >
-                        <Text style={styles.rejectButtonText}>Reject</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.acceptButton}
-                        onPress={() => onAccept(invitation.id)}
-                    >
-                        <Text style={styles.acceptButtonText}>Accept</Text>
-                    </TouchableOpacity>
-                </View>
             </View>
         </View>
     );
@@ -131,7 +110,7 @@ const styles = StyleSheet.create({
         minHeight: 90,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#FFE8E8',
+        backgroundColor: '#E3F2FD',
         borderRadius: 12,
         marginRight: 16,
         paddingVertical: 16,
@@ -140,13 +119,13 @@ const styles = StyleSheet.create({
     dateDay: {
         fontSize: 36,
         fontWeight: 'bold',
-        color: '#D32F2F',
+        color: '#1976D2',
         lineHeight: 40,
     },
     dateMonth: {
         fontSize: 15,
         fontWeight: '600',
-        color: '#D32F2F',
+        color: '#1976D2',
         marginTop: 0,
     },
     detailsSection: {
@@ -194,38 +173,5 @@ const styles = StyleSheet.create({
         color: '#666',
         fontWeight: '500',
         marginLeft: 1,
-    },
-    actionButtonRow: {
-        flexDirection: 'row',
-        gap: 8,
-        marginTop: 8,
-    },
-    rejectButton: {
-        flex: 1,
-        paddingVertical: 10,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#D32F2F',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#fff',
-    },
-    rejectButtonText: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#D32F2F',
-    },
-    acceptButton: {
-        flex: 1,
-        paddingVertical: 10,
-        borderRadius: 8,
-        backgroundColor: '#D32F2F',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    acceptButtonText: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#fff',
     },
 });

@@ -11,9 +11,9 @@ export default function HomePage() {
         <View style={styles.headerRow}>
           <Text style={styles.helloText}>Hello, User01</Text>
           <View style={styles.headerIcons}>
-          <TouchableOpacity onPress={() => router.push('/search-donor')}>
-            <Image source={require('@/assets/images/avatar-icon.png')} style={styles.avatarIcon} />
-          </TouchableOpacity>
+            <TouchableOpacity >
+              <Image source={require('@/assets/images/avatar-icon.png')} style={styles.avatarIcon} />
+            </TouchableOpacity>
             <Image source={require('@/assets/images/bell-icon.png')} style={styles.headerIcon} />
             <Image source={require('@/assets/images/user-icon.png')} style={styles.headerIcon} />
           </View>
@@ -22,7 +22,11 @@ export default function HomePage() {
         {/* Overview Chart */}
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Overview</Text>
-          <Image source={require('@/assets/images/overview-chart.png')} style={styles.chartImage} />
+          <Image
+            source={require('@/assets/images/overview-chart.png')}
+            style={styles.chartImage}
+            contentFit="contain"
+          />
           <Text style={styles.showMore}>Show More</Text>
         </View>
         {/* Facility */}
@@ -96,7 +100,7 @@ export default function HomePage() {
       </ScrollView>
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/(tabs)/AppointmentDonor')}><Image source={require('@/assets/images/appointment-icon.png')} style={styles.navIcon} /><Text style={styles.navText}>Appointment</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/appointment-donor')}><Image source={require('@/assets/images/appointment-icon.png')} style={styles.navIcon} /><Text style={styles.navText}>Appointment</Text></TouchableOpacity>
         <TouchableOpacity style={styles.navItem}><Image source={require('@/assets/images/inbox-icon.png')} style={styles.navIcon} /><Text style={styles.navText}>Inbox</Text></TouchableOpacity>
         <TouchableOpacity style={styles.navItem}><Image source={require('@/assets/images/home-icon.png')} style={styles.navIcon} /><Text style={styles.navText}>Home</Text></TouchableOpacity>
         <TouchableOpacity style={styles.navItem}><Image source={require('@/assets/images/notification-icon.png')} style={styles.navIcon} /><Text style={styles.navText}>Notification</Text></TouchableOpacity>
@@ -118,7 +122,7 @@ const styles = StyleSheet.create({
   logoRed: { color: '#222' },
   card: { backgroundColor: '#fff', borderRadius: 16, padding: 16, marginHorizontal: 18, marginBottom: 12, elevation: 2 },
   sectionTitle: { fontSize: 17, fontWeight: 'bold', color: '#222', marginBottom: 8 },
-  chartImage: { width: '100%', height: 120, resizeMode: 'contain', marginBottom: 8 },
+  chartImage: { width: '100%', height: 120, marginBottom: 8 },
   showMore: { color: '#888', fontSize: 13, textAlign: 'right' },
   facilityRow: {
     flexDirection: 'row',

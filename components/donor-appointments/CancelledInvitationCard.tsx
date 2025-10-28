@@ -3,17 +3,17 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { DonorInvitation, BloodGroup } from '@/types/bloodRequest';
 import { format } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
-import DetailsButton from './DetailsButton';
+import DetailsButton from '../DetailsButton';
 
-interface CompletedInvitationCardProps {
+interface CancelledInvitationCardProps {
     invitation: DonorInvitation;
     onViewDetails: (invitationId: string) => void;
 }
 
-export default function CompletedInvitationCard({
+export default function CancelledInvitationCard({
     invitation,
     onViewDetails,
-}: CompletedInvitationCardProps) {
+}: CancelledInvitationCardProps) {
     const bloodRequest = invitation.blood_request;
     if (!bloodRequest) return null;
 
@@ -81,7 +81,7 @@ export default function CompletedInvitationCard({
             <View style={styles.bottomSection}>
                 <DetailsButton
                     onPress={() => onViewDetails(invitation.id)}
-                    color="#1976D2"
+                    color="#757575"
                 />
             </View>
         </View>
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
         minHeight: 90,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#E3F2FD',
+        backgroundColor: '#F5F5F5',
         borderRadius: 12,
         marginRight: 16,
         paddingVertical: 16,
@@ -119,13 +119,13 @@ const styles = StyleSheet.create({
     dateDay: {
         fontSize: 36,
         fontWeight: 'bold',
-        color: '#1976D2',
+        color: '#757575',
         lineHeight: 40,
     },
     dateMonth: {
         fontSize: 15,
         fontWeight: '600',
-        color: '#1976D2',
+        color: '#757575',
         marginTop: 0,
     },
     detailsSection: {

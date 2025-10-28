@@ -24,7 +24,7 @@ import PendingInvitationCard from './PendingInvitationCard';
 import AcceptedInvitationCard from './AcceptedInvitationCard';
 import CompletedInvitationCard from './CompletedInvitationCard';
 import CancelledInvitationCard from './CancelledInvitationCard';
-import AppointmentDetails from './AppointmentDetails';
+import AppointmentDetails from '../AppointmentDetails';
 import { getUserId } from '@/utils/storage';
 
 // Set to true to use mock data instead of API

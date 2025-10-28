@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import DonorAppointments from '@/components/DonorAppointments';
+import DonorAppointments from '@/components/donor-appointments/DonorAppointments';
 
 export default function DonorAppointmentsScreen() {
     return (

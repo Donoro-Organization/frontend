@@ -1,3 +1,5 @@
-import LandingPage from './(tabs)/landing-page';
+import { Redirect } from 'expo-router';
 
-export default LandingPage;
+export default function Index() {
+    return <Redirect href="/dev-menu" />;
+}

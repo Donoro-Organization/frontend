@@ -247,10 +247,10 @@ const styles = StyleSheet.create({
     marginLeft: 2,
   },
   logo: {
-    width: 180,
-    height: 80,
-    marginBottom: 16,
-    marginTop: 8,
+    width: 250,
+    height: 50,
+    marginBottom: 24,
+    marginTop: 32,
   },
   title: {
     fontSize: 24,

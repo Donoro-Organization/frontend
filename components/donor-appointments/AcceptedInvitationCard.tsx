@@ -1,19 +1,26 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { BloodGroup } from '@/types/bloodRequest';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { DonorInvitation, BloodGroup } from '@/types/bloodRequest';
 import { format } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
-import DetailsButton from './DetailsButton';
+import DetailsButton from '../DetailsButton';
 
-interface CancelledRequestCardProps {
-    request: any;
-    onViewDetails: (requestId: string) => void;
+interface AcceptedInvitationCardProps {
+    invitation: DonorInvitation;
+    onViewDetails: (invitationId: string) => void;
 }
 
-export default function CancelledRequestCard({
-    request,
+export default function AcceptedInvitationCard({
+    invitation,
     onViewDetails,
-}: CancelledRequestCardProps) {
+}: AcceptedInvitationCardProps) {
+    const bloodRequest = invitation.blood_request;
+    if (!bloodRequest) return null;
+
+    const getBloodGroupIcon = (bloodGroup: BloodGroup): string => {
+        return bloodGroup;
+    };
+
     const getDay = (dateString: string) => {
         try {
             return format(new Date(dateString), 'd');
@@ -44,27 +51,27 @@ export default function CancelledRequestCard({
             <View style={styles.topSection}>
                 {/* Left: Date Badge */}
                 <View style={styles.dateSection}>
-                    <Text style={styles.dateDay}>{getDay(request.required_datetime)}</Text>
-                    <Text style={styles.dateMonth}>{getMonth(request.required_datetime)}</Text>
+                    <Text style={styles.dateDay}>{getDay(bloodRequest.required_datetime)}</Text>
+                    <Text style={styles.dateMonth}>{getMonth(bloodRequest.required_datetime)}</Text>
                 </View>
 
                 {/* Right: Content Details */}
                 <View style={styles.detailsSection}>
                     <Text style={styles.hospitalName} numberOfLines={1}>
-                        {request.location}
+                        {bloodRequest.location}
                     </Text>
                     <Text style={styles.condition} numberOfLines={1}>
-                        {request.patient_condition || 'Blood needed'}
+                        {bloodRequest.patient_condition || 'Blood needed'}
                     </Text>
 
                     {/* Blood Type and Time Row */}
                     <View style={styles.infoRow}>
                         <View style={styles.bloodBadge}>
-                            <Text style={styles.bloodText}>{request.blood_group}</Text>
+                            <Text style={styles.bloodText}>{getBloodGroupIcon(bloodRequest.blood_group)}</Text>
                         </View>
                         <View style={styles.timeContainer}>
                             <Ionicons name="time-outline" size={16} color="#666" />
-                            <Text style={styles.timeText}>{getTime(request.required_datetime)}</Text>
+                            <Text style={styles.timeText}>{getTime(bloodRequest.required_datetime)}</Text>
                         </View>
                     </View>
                 </View>
@@ -73,8 +80,8 @@ export default function CancelledRequestCard({
             {/* Bottom Section: Action Button */}
             <View style={styles.bottomSection}>
                 <DetailsButton
-                    onPress={() => onViewDetails(request.id)}
-                    color="#757575"
+                    onPress={() => onViewDetails(invitation.id)}
+                    color="#2E7D32"
                 />
             </View>
         </View>
@@ -103,7 +110,7 @@ const styles = StyleSheet.create({
         minHeight: 90,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#F5F5F5',
+        backgroundColor: '#E8F5E9',
         borderRadius: 12,
         marginRight: 16,
         paddingVertical: 16,
@@ -112,13 +119,13 @@ const styles = StyleSheet.create({
     dateDay: {
         fontSize: 36,
         fontWeight: 'bold',
-        color: '#757575',
+        color: '#2E7D32',
         lineHeight: 40,
     },
     dateMonth: {
         fontSize: 15,
         fontWeight: '600',
-        color: '#757575',
+        color: '#2E7D32',
         marginTop: 0,
     },
     detailsSection: {

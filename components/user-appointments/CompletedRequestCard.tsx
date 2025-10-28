@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { BloodGroup } from '@/types/bloodRequest';
 import { format } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
-import DetailsButton from './DetailsButton';
+import DetailsButton from '../DetailsButton';
 
 interface CompletedRequestCardProps {
     request: any;

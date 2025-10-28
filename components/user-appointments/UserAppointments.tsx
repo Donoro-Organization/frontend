@@ -21,7 +21,7 @@ import PendingRequestCard from './PendingRequestCard';
 import AcceptedRequestCard from './AcceptedRequestCard';
 import CompletedRequestCard from './CompletedRequestCard';
 import CancelledRequestCard from './CancelledRequestCard';
-import RequestDetails from './RequestDetails';
+import RequestDetails from '../RequestDetails';
 import { getUserId } from '@/utils/storage';
 
 // Set to true to use mock data instead of API
