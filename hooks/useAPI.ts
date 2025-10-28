@@ -143,6 +143,8 @@ export async function apiCall<T = any>(
     }
   }
 
+  requestHeaders[ "ngrok-skip-browser-warning"]= 'true';
+
   const requestOptions: RequestInit = {
     method,
     headers: requestHeaders,
