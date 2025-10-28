@@ -22,7 +22,6 @@ export default function SigninPage() {
     const { promptAsync, response } = useGoogleAuth();
     const { promptAsync: facebookPromptAsync, response: facebookResponse } = useFacebookAuth();
 
-    const API = config.BACKEND_API_ENDPOINT;
 
     // Handle Google OAuth response
     useEffect(() => {

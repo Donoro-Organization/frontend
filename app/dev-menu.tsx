@@ -39,7 +39,8 @@ export default function DevMenu() {
         // Post screens
         { name: 'Create Post', route: '/create-post', icon: 'plus-square' },
         { name: 'Edit Post', route: '/edit-post', icon: 'edit' },
-
+        {name: "Location Picker", route: "/location-example", icon: "map-pin"},
+        
         // Other
         { name: 'Loading', route: '/loading', icon: 'loader' },
     ];

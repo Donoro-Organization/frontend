@@ -10,6 +10,7 @@ const config = {
   GOOGLE_IOS_CLIENT_ID: Constants.expoConfig?.extra?.GOOGLE_IOS_CLIENT_ID || "",
   FACEBOOK_APP_ID: Constants.expoConfig?.extra?.FACEBOOK_APP_ID || "",
   FACEBOOK_APP_SECRET: Constants.expoConfig?.extra?.FACEBOOK_APP_SECRET || "",
+  GOOGLE_MAPS_API_KEY: Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY || "",
   ENV: Constants.expoConfig?.extra?.ENV || "prod",
 };
 

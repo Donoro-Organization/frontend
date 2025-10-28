@@ -6,7 +6,7 @@ export default {
     slug: "donoro",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/images/icon.png",
+    icon: "./assets/images/donoroLogo.png",
     scheme: "donoro",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
@@ -22,11 +22,16 @@ export default {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/images/adaptive-icon.png",
+        foregroundImage: "./assets/images/donoroLogo.png",
         backgroundColor: "#ffffff",
       },
       package: "com.android.donoro",
       edgeToEdgeEnabled: true,
+      config: {
+        googleMaps: {
+          apiKey: process.env.GOOGLE_MAPS_API_KEY,
+        },
+      },
     },
     web: {
       bundler: "metro",
@@ -34,6 +39,7 @@ export default {
     },
     plugins: [
       "expo-router",
+      "expo-application",
       [
         "expo-splash-screen",
         {
@@ -51,18 +57,6 @@ export default {
           },
         },
       ],
-      [
-        "react-native-fbsdk-next",
-        {
-          appID: process.env.FACEBOOK_APP_ID,
-          clientToken: process.env.FACEBOOK_APP_ID,
-          displayName: "Donoro",
-          scheme: `fb${process.env.FACEBOOK_APP_ID}`,
-          advertiserIDCollectionEnabled: false,
-          autoLogAppEventsEnabled: false,
-          isAutoInitEnabled: true,
-        },
-      ],
     ],
     experiments: {
       typedRoutes: true,
@@ -74,6 +68,7 @@ export default {
       GOOGLE_IOS_CLIENT_ID: process.env.GOOGLE_IOS_CLIENT_ID,
       FACEBOOK_APP_ID: process.env.FACEBOOK_APP_ID,
       FACEBOOK_APP_SECRET: process.env.FACEBOOK_APP_SECRET,
+      GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
       ENV: process.env.ENV,
       eas: {
         projectId: "5deaafb3-3895-44da-94e6-48b9cffbdd5a",

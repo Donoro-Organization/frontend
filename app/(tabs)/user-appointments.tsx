@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import UserAppointments from '@/components/UserAppointments';
+import UserAppointments from '@/components/user-appointments/UserAppointments';
 
 
 export default function UserAppointmentsScreen() {
