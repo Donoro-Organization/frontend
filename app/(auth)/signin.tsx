@@ -11,6 +11,7 @@ import { apiCall } from '@/hooks/useAPI';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ErrorDialog from '../../components/ErrorDialog';
 import { saveUserData } from '@/utils/storage';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SigninPage() {
     const [serverError, setServerError] = useState<string | null>(null);
@@ -19,9 +20,20 @@ export default function SigninPage() {
     const [errorVisible, setErrorVisible] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const router = useRouter();
+    const { activeOAuthProvider, setActiveOAuthProvider, setAuthMode } = useAuth();
     const { promptAsync, response } = useGoogleAuth();
     const { promptAsync: facebookPromptAsync, response: facebookResponse } = useFacebookAuth();
 
+    // Set authMode to signin when component mounts
+    useEffect(() => {
+        setAuthMode('signin');
+    }, []);
+
+    // Sync loading states with active provider
+    useEffect(() => {
+        setIsGoogleLoading(activeOAuthProvider === 'google');
+        setIsFacebookLoading(activeOAuthProvider === 'facebook');
+    }, [activeOAuthProvider]);
 
     // Handle Google OAuth response
     useEffect(() => {
@@ -32,6 +44,7 @@ export default function SigninPage() {
             }
         } else if (response?.type === 'error') {
             setIsGoogleLoading(false);
+            setActiveOAuthProvider(null);
             setErrorMessage('Google sign-in failed. Please try again.');
             setErrorVisible(true);
         }
@@ -46,6 +59,7 @@ export default function SigninPage() {
             }
         } else if (facebookResponse?.type === 'error') {
             setIsFacebookLoading(false);
+            setActiveOAuthProvider(null);
             setErrorMessage('Facebook sign-in failed. Please try again.');
             setErrorVisible(true);
         }
@@ -54,6 +68,7 @@ export default function SigninPage() {
     const handleGoogleSignin = async (accessToken: string) => {
         try {
             setIsGoogleLoading(true);
+            setActiveOAuthProvider('google');
 
             // Get user info from Google
             const userInfo = await getGoogleUserInfo(accessToken);
@@ -93,12 +108,14 @@ export default function SigninPage() {
             setErrorVisible(true);
         } finally {
             setIsGoogleLoading(false);
+            setActiveOAuthProvider(null);
         }
     };
 
     const handleFacebookSignin = async (accessToken: string) => {
         try {
             setIsFacebookLoading(true);
+            setActiveOAuthProvider('facebook');
 
             // Get user info from Facebook
             const userInfo = await getFacebookUserInfo(accessToken);
@@ -138,15 +155,18 @@ export default function SigninPage() {
             setErrorVisible(true);
         } finally {
             setIsFacebookLoading(false);
+            setActiveOAuthProvider(null);
         }
     };
 
     const handleGooglePress = async () => {
         setIsGoogleLoading(true);
+        setActiveOAuthProvider('google');
         try {
             await promptAsync();
         } catch (error) {
             setIsGoogleLoading(false);
+            setActiveOAuthProvider(null);
             setErrorMessage('Failed to initiate Google sign-in');
             setErrorVisible(true);
         }
@@ -154,10 +174,12 @@ export default function SigninPage() {
 
     const handleFacebookPress = async () => {
         setIsFacebookLoading(true);
+        setActiveOAuthProvider('facebook');
         try {
             await facebookPromptAsync();
         } catch (error) {
             setIsFacebookLoading(false);
+            setActiveOAuthProvider(null);
             setErrorMessage('Failed to initiate Facebook sign-in');
             setErrorVisible(true);
         }

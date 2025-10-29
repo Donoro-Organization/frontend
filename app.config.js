@@ -6,8 +6,8 @@ export default {
     slug: "donoro",
     version: "1.0.0",
     orientation: "portrait",
+    scheme: "com.donoro.app",
     icon: "./assets/images/logo_white.png",
-    scheme: "donoro",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     splash: {
@@ -17,21 +17,44 @@ export default {
     },
     assetBundlePatterns: ["**/*"],
     ios: {
-      bundleIdentifier: "com.ios.donoro",
+      bundleIdentifier: "com.donoro.app",
       supportsTablet: true,
+      infoPlist: {
+        CFBundleURLTypes: [
+          {
+            CFBundleURLSchemes: ["com.donoro.app", `fb${process.env.FACEBOOK_APP_ID}`]
+          }
+        ],
+        LSApplicationQueriesSchemes: ["fbapi", "fb-messenger-share-api"]
+      }
     },
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/images/logo_white.png",
         backgroundColor: "#ffffff",
       },
-      package: "com.android.donoro",
+      package: "com.donoro.app",
       edgeToEdgeEnabled: true,
       config: {
         googleMaps: {
           apiKey: process.env.GOOGLE_MAPS_API_KEY,
         },
       },
+      intentFilters: [
+        {
+          action: "VIEW",
+          autoVerify: true,
+          data: [
+            {
+              scheme: "com.donoro.app"
+            },
+            {
+              scheme: `fb${process.env.FACEBOOK_APP_ID}`
+            }
+          ],
+          category: ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     web: {
       bundler: "metro",
@@ -60,7 +83,6 @@ export default {
     experiments: {
       typedRoutes: true,
     },
-    scheme: ["donoro", `fb${process.env.FACEBOOK_APP_ID}`],
     extra: {
       BACKEND_API_ENDPOINT: process.env.BACKEND_API_ENDPOINT,
       GOOGLE_WEB_CLIENT_ID: process.env.GOOGLE_WEB_CLIENT_ID,

@@ -9,6 +9,7 @@ import { useGoogleAuth, getGoogleUserInfo } from '../../utils/googleAuth';
 import { useFacebookAuth, getFacebookUserInfo } from '../../utils/facebookAuth';
 import { apiCall } from '@/hooks/useAPI';
 import ErrorDialog from '../../components/ErrorDialog';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function RegisterPage() {
   const [agree, setAgree] = useState(false);
@@ -18,10 +19,22 @@ export default function RegisterPage() {
   const [errorVisible, setErrorVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const router = useRouter();
+  const { activeOAuthProvider, setActiveOAuthProvider, setAuthMode } = useAuth();
   const { request, promptAsync, response } = useGoogleAuth();
   const { promptAsync: facebookPromptAsync, response: facebookResponse } = useFacebookAuth();
 
   const API = config.BACKEND_API_ENDPOINT;
+
+  // Set authMode to signup when component mounts
+  useEffect(() => {
+    setAuthMode('signup');
+  }, []);
+
+  // Sync loading states with active provider
+  useEffect(() => {
+    setIsGoogleLoading(activeOAuthProvider === 'google');
+    setIsFacebookLoading(activeOAuthProvider === 'facebook');
+  }, [activeOAuthProvider]);
 
   // Debug: Check if request is ready
   useEffect(() => {
@@ -43,11 +56,13 @@ export default function RegisterPage() {
     } else if (response?.type === 'error') {
       console.error('🔴 OAuth Error:', response);
       setIsGoogleLoading(false);
+      setActiveOAuthProvider(null);
       setErrorMessage('Google sign-in failed. Please try again.');
       setErrorVisible(true);
     } else if (response?.type === 'cancel') {
       console.log('🟠 OAuth Cancelled by user');
       setIsGoogleLoading(false);
+      setActiveOAuthProvider(null);
     }
   }, [response]);
 
@@ -70,6 +85,7 @@ export default function RegisterPage() {
   const handleGoogleSignup = async (accessToken: string) => {
     try {
       setIsGoogleLoading(true);
+      setActiveOAuthProvider('google');
 
       // Get user info from Google
       const userInfo = await getGoogleUserInfo(accessToken);
@@ -104,12 +120,14 @@ export default function RegisterPage() {
       setErrorVisible(true);
     } finally {
       setIsGoogleLoading(false);
+      setActiveOAuthProvider(null);
     }
   };
 
   const handleFacebookSignup = async (accessToken: string) => {
     try {
       setIsFacebookLoading(true);
+      setActiveOAuthProvider('facebook');
 
       // Get user info from Facebook
       const userInfo = await getFacebookUserInfo(accessToken);
@@ -144,6 +162,7 @@ export default function RegisterPage() {
       setErrorVisible(true);
     } finally {
       setIsFacebookLoading(false);
+      setActiveOAuthProvider(null);
     }
   };
 
@@ -158,6 +177,7 @@ export default function RegisterPage() {
     }
 
     setIsGoogleLoading(true);
+    setActiveOAuthProvider('google');
     console.log('🔵 Calling promptAsync...');
 
     try {
@@ -167,10 +187,12 @@ export default function RegisterPage() {
       if (result.type === 'dismiss' || result.type === 'cancel') {
         console.log('🟠 User cancelled OAuth');
         setIsGoogleLoading(false);
+        setActiveOAuthProvider(null);
       }
     } catch (error) {
       console.error('🔴 Error in promptAsync:', error);
       setIsGoogleLoading(false);
+      setActiveOAuthProvider(null);
       setErrorMessage('Failed to initiate Google sign-in');
       setErrorVisible(true);
     }
@@ -184,16 +206,19 @@ export default function RegisterPage() {
     }
 
     setIsFacebookLoading(true);
+    setActiveOAuthProvider('facebook');
 
     try {
       const result = await facebookPromptAsync({ showInRecents: true });
 
       if (result.type === 'dismiss' || result.type === 'cancel') {
         setIsFacebookLoading(false);
+        setActiveOAuthProvider(null);
       }
     } catch (error) {
       console.error('Error in Facebook OAuth:', error);
       setIsFacebookLoading(false);
+      setActiveOAuthProvider(null);
       setErrorMessage('Failed to initiate Facebook sign-in');
       setErrorVisible(true);
     }

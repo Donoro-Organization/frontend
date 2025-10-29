@@ -21,7 +21,7 @@ export default function UserProfile({ user, isOwnProfile }: UserProfileProps) {
     };
 
     const handleEditProfile = () => {
-        console.log('Edit profile');
+        router.push('/edit-profile');
     };
 
     const handleReview = () => {

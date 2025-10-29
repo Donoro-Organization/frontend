@@ -1,5 +1,6 @@
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
+import { makeRedirectUri } from "expo-auth-session";
 import config from "../config/config";
 
 WebBrowser.maybeCompleteAuthSession();
@@ -13,11 +14,22 @@ export interface GoogleAuthResult {
 }
 
 export const useGoogleAuth = () => {
+
+  const redirectUri = makeRedirectUri({ native:'com.donoro.app:/oauthredirect' });
+
   const [request, response, promptAsync] = Google.useAuthRequest({
     webClientId: config.GOOGLE_WEB_CLIENT_ID,
     androidClientId: config.GOOGLE_ANDROID_CLIENT_ID,
     iosClientId: config.GOOGLE_IOS_CLIENT_ID,
+    redirectUri: redirectUri,
   });
+
+  if(request)
+  {
+    console.log("Google Request Redirect URI:", request.redirectUri);
+  }
+
+  // console.log("Google Redirect URI:", redirectUri);
 
   return {
     request,

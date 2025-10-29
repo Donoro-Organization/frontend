@@ -1,435 +1,697 @@
-import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    StyleSheet,
+    ScrollView,
+    Platform,
+    Alert,
+    ActivityIndicator,
+} from 'react-native';
+import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { User, Gender } from '@/types/user';
+import { DonorSignupData } from '@/types/donor';
+import { BloodGroup } from '@/types/bloodRequest';
+import { apiCall } from '@/hooks/useAPI';
+import { getUserId } from '@/utils/storage';
+import LocationPicker, { SelectedLocation } from '@/components/LocationPicker';
+import ErrorDialog from '@/components/ErrorDialog';
+import SuccessDialog from '@/components/SuccessDialog';
+import { formatDateToDhaka } from '@/utils/time';
+
 
 export default function BecomeDonor() {
-  const router = useRouter();
-  
-  const [formData, setFormData] = useState({
-    fullName: '',
-    phoneNumber: '',
-    email: '',
-    nidNumber: '',
-    gender: '',
-    bloodGroup: '',
-    makeContactVisible: false,
-  });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [showError, setShowError] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [showBirthDatePicker, setShowBirthDatePicker] = useState(false);
+    const [showLastDonationPicker, setShowLastDonationPicker] = useState(false);
+    const [birthDate, setBirthDate] = useState<Date>(new Date());
+    const [lastDonationDate, setLastDonationDate] = useState<Date>(new Date());
+    const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
-  const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+    const [formData, setFormData] = useState<DonorSignupData>({
+        first_name: '',
+        last_name: '',
+        phone: '',
+        gender: '',
+        birth_date: '',
+        last_donation_date: '',
+        blood_group: '',
+        latitude: '',
+        longitude: '',
+        address: '',
+    });
 
-  const handleConfirm = () => {
-    // Here you would typically validate the form and submit the data
-    // For now, let's navigate back to HomePage with a success message
-    router.push('/homepage');
-  };
+    // Load current user data
+    useEffect(() => {
+        loadUserData();
+    }, []);
 
-  return (
-    <View style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => {
-            if (router.canGoBack()) {
-              router.back();
-            } else {
-              router.push('/homepage');
+    // Set loading when entering page 3 without address
+    useEffect(() => {
+        if (currentPage === 3 && !formData.address) {
+            setIsLoadingLocation(true);
+        }
+    }, [currentPage, formData.address]);
+
+    const loadUserData = async () => {
+        try {
+            const userId = await getUserId();
+            if (!userId) return;
+
+            // Fetch user data from API using apiCall
+            const user: User = await apiCall(`/users/${userId}`, {
+                method: 'GET',
+                requiresAuth: true,
+            });
+
+            setCurrentUser(user);
+            // Pre-fill form with existing user data
+            const birthDateStr = user.birth_date ? formatDateForInput(user.birth_date) : '';
+            setFormData((prev) => ({
+                ...prev,
+                first_name: user.first_name || '',
+                last_name: user.last_name || '',
+                phone: user.phone || '',
+                gender: user.gender || '',
+                birth_date: birthDateStr,
+                latitude: user.latitude || '',
+                longitude: user.longitude || '',
+                address: user.address || '',
+            }));
+
+            // Set date objects for date pickers
+            if (user.birth_date) {
+                setBirthDate(new Date(user.birth_date));
             }
-          }} style={styles.backButton}>
-            <Image source={require('@/assets/images/back-icon.png')} style={styles.backIcon} />
-          </TouchableOpacity>
-          <Text style={styles.title}>Become Donor</Text>
-        </View>
+        } catch (error) {
+            console.error('Error loading user data:', error);
+            setErrorMessage('Failed to load user data. Please try again.');
+            setShowError(true);
+        }
+    };
 
-        {/* Form Fields */}
-        <View style={styles.formContainer}>
-          <View style={styles.inputContainer}>
+    const formatDateForInput = (dateString: string): string => {
+        try {
+            const date = new Date(dateString);
+            return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+        } catch {
+            return '';
+        }
+    };
+
+    const handleNext = () => {
+        if (currentPage === 1) {
+            // Validate page 1
+            if (!formData.first_name.trim()) {
+                setErrorMessage('Please enter your first name');
+                setShowError(true);
+                return;
+            }
+            if (!formData.last_name.trim()) {
+                setErrorMessage('Please enter your last name');
+                setShowError(true);
+                return;
+            }
+            if (!formData.phone.trim()) {
+                setErrorMessage('Please enter your phone number');
+                setShowError(true);
+                return;
+            }
+            if (!formData.gender) {
+                setErrorMessage('Please select your gender');
+                setShowError(true);
+                return;
+            }
+            if (!formData.birth_date) {
+                setErrorMessage('Please enter your birth date');
+                setShowError(true);
+                return;
+            }
+            setCurrentPage(2);
+        } else if (currentPage === 2) {
+            // Validate page 2
+            if (!formData.blood_group) {
+                setErrorMessage('Please select your blood group');
+                setShowError(true);
+                return;
+            }
+            setCurrentPage(3);
+        }
+    };
+
+    const handleBack = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        } else {
+            router.back();
+        }
+    };
+
+    const handleLocationSelect = (location: SelectedLocation) => {
+        setIsLoadingLocation(false);
+        setFormData((prev) => ({
+            ...prev,
+            latitude: location.latitude.toString(),
+            longitude: location.longitude.toString(),
+            address: location.address || location.name,
+        }));
+    };
+
+    const handleSubmit = async () => {
+        // Validate page 3
+        if (!formData.latitude || !formData.longitude) {
+            setErrorMessage('Please select your location on the map');
+            setShowError(true);
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            // Prepare the data for API - format dates to ISO string
+            const donorData = {
+                first_name: formData.first_name,
+                last_name: formData.last_name,
+                phone: formData.phone,
+                gender: formData.gender,
+                birth_date: formData.birth_date ? `${formData.birth_date}T00:00:00` : null,
+                blood_group: formData.blood_group,
+                last_donation_date: formData.last_donation_date ? `${formData.last_donation_date}T00:00:00` : null,
+                latitude: formData.latitude,
+                longitude: formData.longitude,
+                address: formData.address,
+            };
+
+            const result = await apiCall('/auth/donor/signup', {
+                method: 'POST',
+                body: donorData,
+                requiresAuth: true,
+            });
+
+            if (result.status_code === 201) {
+                setSuccessMessage('You have successfully registered as a donor!');
+                setShowSuccess(true);
+                setTimeout(() => {
+                    router.push('/home-page');
+                }, 2000);
+            } else {
+                setErrorMessage(result.message || 'Failed to register as donor');
+                setShowError(true);
+            }
+        } catch (error) {
+            console.error('Donor signup error:', error);
+            setErrorMessage(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
+            setShowError(true);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const renderPage1 = () => (
+        <ScrollView style={styles.pageContainer} showsVerticalScrollIndicator={false}>
+            <Text style={styles.pageTitle}>Personal Information</Text>
+
+            <Text style={styles.label}>First Name</Text>
             <TextInput
-              style={styles.input}
-              placeholder="Full Name"
-              value={formData.fullName}
-              onChangeText={(text) => setFormData({...formData, fullName: text})}
-              placeholderTextColor="#999"
+                style={styles.input}
+                placeholder="Enter your first name"
+                value={formData.first_name}
+                onChangeText={(text) => setFormData({ ...formData, first_name: text })}
             />
-          </View>
 
-          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Last Name</Text>
             <TextInput
-              style={styles.input}
-              placeholder="Phone Number"
-              value={formData.phoneNumber}
-              onChangeText={(text) => setFormData({...formData, phoneNumber: text})}
-              placeholderTextColor="#999"
-              keyboardType="phone-pad"
+                style={styles.input}
+                placeholder="Enter your last name"
+                value={formData.last_name}
+                onChangeText={(text) => setFormData({ ...formData, last_name: text })}
             />
-          </View>
 
-          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Phone Number</Text>
             <TextInput
-              style={styles.input}
-              placeholder="Email"
-              value={formData.email}
-              onChangeText={(text) => setFormData({...formData, email: text})}
-              placeholderTextColor="#999"
-              keyboardType="email-address"
-              autoCapitalize="none"
+                style={styles.input}
+                placeholder="Enter your phone number"
+                value={formData.phone}
+                onChangeText={(text) => setFormData({ ...formData, phone: text })}
+                keyboardType="phone-pad"
             />
-          </View>
 
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="NID Number"
-              value={formData.nidNumber}
-              onChangeText={(text) => setFormData({...formData, nidNumber: text})}
-              placeholderTextColor="#999"
-              keyboardType="numeric"
-            />
-          </View>
-        </View>
-
-        {/* Gender Selection */}
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Gender</Text>
-          <View style={styles.genderContainer}>
-            <TouchableOpacity 
-              style={[
-                styles.genderButton,
-                formData.gender === 'male' && styles.genderButtonActive
-              ]}
-              onPress={() => setFormData({...formData, gender: 'male'})}
-            >
-              <View style={styles.genderIcon}>
-                <Text style={styles.genderIconText}>♂</Text>
-              </View>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[
-                styles.genderButton,
-                formData.gender === 'female' && styles.genderButtonActive
-              ]}
-              onPress={() => setFormData({...formData, gender: 'female'})}
-            >
-              <View style={styles.genderIcon}>
-                <Text style={styles.genderIconText}>♀</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Blood Group Selection */}
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Select Blood Group</Text>
-          <View style={styles.bloodGroupContainer}>
-            <View style={styles.bloodGroupRow}>
-              {bloodGroups.slice(0, 6).map((group) => (
-                <TouchableOpacity
-                  key={group}
-                  style={[
-                    styles.bloodGroupButton,
-                    formData.bloodGroup === group && styles.bloodGroupButtonActive
-                  ]}
-                  onPress={() => setFormData({...formData, bloodGroup: group})}
-                >
-                  <Text style={[
-                    styles.bloodGroupText,
-                    formData.bloodGroup === group && styles.bloodGroupTextActive
-                  ]}>
-                    {group}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+            <Text style={styles.label}>Gender</Text>
+            <View style={styles.genderContainer}>
+                {[
+                    { label: '♂ Male', value: Gender.MALE },
+                    { label: '♀ Female', value: Gender.FEMALE },
+                    { label: 'Other', value: Gender.OTHER },
+                ].map((option) => (
+                    <TouchableOpacity
+                        key={option.value}
+                        style={[
+                            styles.genderButton,
+                            formData.gender === option.value && styles.genderButtonActive,
+                        ]}
+                        onPress={() => setFormData({ ...formData, gender: option.value })}
+                    >
+                        <Text
+                            style={[
+                                styles.genderButtonText,
+                                formData.gender === option.value && styles.genderButtonTextActive,
+                            ]}
+                        >
+                            {option.label}
+                        </Text>
+                    </TouchableOpacity>
+                ))}
             </View>
-            <View style={styles.bloodGroupRow}>
-              {bloodGroups.slice(6).map((group) => (
-                <TouchableOpacity
-                  key={group}
-                  style={[
-                    styles.bloodGroupButton,
-                    formData.bloodGroup === group && styles.bloodGroupButtonActive
-                  ]}
-                  onPress={() => setFormData({...formData, bloodGroup: group})}
-                >
-                  <Text style={[
-                    styles.bloodGroupText,
-                    formData.bloodGroup === group && styles.bloodGroupTextActive
-                  ]}>
-                    {group}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        </View>
 
-        {/* Checkbox */}
-        <View style={styles.checkboxContainer}>
-          <TouchableOpacity
-            style={styles.checkbox}
-            onPress={() => setFormData({...formData, makeContactVisible: !formData.makeContactVisible})}
-          >
-            <View style={[
-              styles.checkboxBox,
-              formData.makeContactVisible && styles.checkboxBoxChecked
-            ]}>
-              {formData.makeContactVisible && (
-                <Text style={styles.checkboxCheck}>✓</Text>
-              )}
+            <Text style={styles.label}>Birth Date</Text>
+            {Platform.OS === 'web' ? (
+                <TextInput
+                    style={styles.input}
+                    placeholder="YYYY-MM-DD"
+                    value={formData.birth_date}
+                    onChangeText={(text) => setFormData({ ...formData, birth_date: text })}
+                    // @ts-ignore - type prop exists on web
+                    type="date"
+                />
+            ) : (
+                <>
+                    <TouchableOpacity
+                        style={styles.datePickerButton}
+                        onPress={() => setShowBirthDatePicker(true)}
+                    >
+                        <Text style={styles.datePickerText}>
+                            {formData.birth_date || 'Select Birth Date'}
+                        </Text>
+                        <Ionicons name="calendar-outline" size={24} color="#666" />
+                    </TouchableOpacity>
+
+                    {showBirthDatePicker && (
+                        <DateTimePicker
+                            value={birthDate}
+                            mode="date"
+                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                            onChange={(event, selectedDate) => {
+                                if (Platform.OS === 'android') {
+                                    setShowBirthDatePicker(false);
+                                }
+                                if (selectedDate && event.type !== 'dismissed') {
+                                    setBirthDate(selectedDate);
+                                    setFormData({
+                                        ...formData,
+                                        birth_date: formatDateToDhaka(selectedDate),
+                                    });
+                                }
+                            }}
+                            maximumDate={new Date()}
+                        />
+                    )}
+                </>
+            )}
+        </ScrollView>
+    );
+
+    const renderPage2 = () => (
+        <ScrollView style={styles.pageContainer} showsVerticalScrollIndicator={false}>
+            <Text style={styles.pageTitle}>Donor Information</Text>
+
+            <Text style={styles.label}>Select Blood Group</Text>
+            <View style={styles.bloodGroupContainer}>
+                {Object.values(BloodGroup).map((group) => (
+                    <TouchableOpacity
+                        key={group}
+                        style={[
+                            styles.bloodGroupButton,
+                            formData.blood_group === group && styles.bloodGroupButtonActive,
+                        ]}
+                        onPress={() => setFormData({ ...formData, blood_group: group })}
+                    >
+                        <Text
+                            style={[
+                                styles.bloodGroupButtonText,
+                                formData.blood_group === group && styles.bloodGroupButtonTextActive,
+                            ]}
+                        >
+                            {group}
+                        </Text>
+                    </TouchableOpacity>
+                ))}
             </View>
-            <Text style={styles.checkboxText}>
-              Do you want to make your contact number visible?
+
+            <Text style={styles.label}>Last Donation Date (Optional)</Text>
+            {Platform.OS === 'web' ? (
+                <TextInput
+                    style={styles.input}
+                    placeholder="YYYY-MM-DD"
+                    value={formData.last_donation_date}
+                    onChangeText={(text) => setFormData({ ...formData, last_donation_date: text })}
+                    // @ts-ignore - type prop exists on web
+                    type="date"
+                />
+            ) : (
+                <>
+                    <TouchableOpacity
+                        style={styles.datePickerButton}
+                        onPress={() => setShowLastDonationPicker(true)}
+                    >
+                        <Text style={styles.datePickerText}>
+                            {formData.last_donation_date || 'Select Last Donation Date'}
+                        </Text>
+                        <Ionicons name="calendar-outline" size={24} color="#666" />
+                    </TouchableOpacity>
+
+                    {showLastDonationPicker && (
+                        <DateTimePicker
+                            value={lastDonationDate}
+                            mode="date"
+                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                            onChange={(event, selectedDate) => {
+                                if (Platform.OS === 'android') {
+                                    setShowLastDonationPicker(false);
+                                }
+                                if (selectedDate && event.type !== 'dismissed') {
+                                    setLastDonationDate(selectedDate);
+                                    setFormData({
+                                        ...formData,
+                                        last_donation_date: formatDateToDhaka(selectedDate),
+                                    });
+                                }
+                            }}
+                            maximumDate={new Date()}
+                        />
+                    )}
+                </>
+            )}
+
+            <Text style={styles.helperText}>
+                Leave empty if this is your first donation
             </Text>
-          </TouchableOpacity>
+        </ScrollView>
+    );
+
+    const renderPage3 = () => (
+        <View style={styles.pageContainer}>
+            <Text style={styles.pageTitle}>Select Your Location</Text>
+            <Text style={styles.helperText}>
+                {isLoadingLocation
+                    ? 'Loading address...'
+                    : formData.address || 'Choose your location so people can find you when they need blood'}
+            </Text>
+
+            <View style={styles.mapContainer}>
+                <LocationPicker
+                    initialLocation={
+                        formData.latitude && formData.longitude
+                            ? {
+                                name: formData.address || 'Selected Location',
+                                latitude: parseFloat(formData.latitude),
+                                longitude: parseFloat(formData.longitude),
+                                address: formData.address,
+                            }
+                            : undefined
+                    }
+                    onLocationSelect={handleLocationSelect}
+                />
+            </View>
         </View>
+    );
 
-        {/* Confirm Button */}
-        <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
-          <Text style={styles.confirmButtonText}>Confirm</Text>
-        </TouchableOpacity>
+    return (
+        <View style={styles.container}>
+            {/* Header */}
+            <View style={styles.header}>
+                <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+                    <Ionicons name="arrow-back" size={24} color="#C62828" />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Become Donor</Text>
+                <View style={styles.placeholder} />
+            </View>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
+            {/* Progress Indicator */}
+            <View style={styles.progressContainer}>
+                {[1, 2, 3].map((page) => (
+                    <View
+                        key={page}
+                        style={[
+                            styles.progressDot,
+                            currentPage >= page && styles.progressDotActive,
+                        ]}
+                    />
+                ))}
+            </View>
 
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          <Image source={require('@/assets/images/appointment-icon.png')} style={styles.navIcon} />
-          <Text style={styles.navText}>Appointment</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Image source={require('@/assets/images/inbox-icon.png')} style={styles.navIcon} />
-          <View style={styles.badgeContainer}>
-            <Text style={styles.badge}>1</Text>
-          </View>
-          <Text style={styles.navText}>Inbox</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.navItem, styles.navItemActive]} onPress={() => router.push('/(tabs)/HomePage')}>
-          <Image source={require('@/assets/images/home-icon.png')} style={[styles.navIcon, styles.navIconActive]} />
-          <Text style={[styles.navText, styles.navTextActive]}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Image source={require('@/assets/images/notification-icon.png')} style={styles.navIcon} />
-          <Text style={styles.navText}>Notification</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Image source={require('@/assets/images/settings-icon.png')} style={styles.navIcon} />
-          <Text style={styles.navText}>Settings</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+            {/* Page Content */}
+            {currentPage === 1 && renderPage1()}
+            {currentPage === 2 && renderPage2()}
+            {currentPage === 3 && renderPage3()}
+
+            {/* Navigation Buttons */}
+            <View style={styles.buttonContainer}>
+                {currentPage < 3 ? (
+                    <TouchableOpacity
+                        style={styles.nextButton}
+                        onPress={handleNext}
+                    >
+                        <Text style={styles.nextButtonText}>Next</Text>
+                    </TouchableOpacity>
+                ) : (
+                    <TouchableOpacity
+                        style={[styles.nextButton, loading && styles.nextButtonDisabled]}
+                        onPress={handleSubmit}
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <ActivityIndicator color="#fff" />
+                        ) : (
+                            <Text style={styles.nextButtonText}>Submit</Text>
+                        )}
+                    </TouchableOpacity>
+                )}
+            </View>
+
+            {/* Error Dialog */}
+            <ErrorDialog
+                visible={showError}
+                message={errorMessage}
+                onClose={() => setShowError(false)}
+            />
+            {/* Success Dialog */}
+            <SuccessDialog
+                visible={showSuccess}
+                message={successMessage}
+                onClose={() => {
+                    setShowSuccess(false);
+                }}
+            />
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 30,
-  },
-  backButton: {
-    marginRight: 20,
-  },
-  backIcon: {
-    width: 24,
-    height: 24,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#222',
-    flex: 1,
-    textAlign: 'center',
-    marginRight: 44, // To center the title accounting for back button
-  },
-  formContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 30,
-  },
-  inputContainer: {
-    marginBottom: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    fontSize: 16,
-    color: '#222',
-    backgroundColor: '#fff',
-  },
-  sectionContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 30,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#222',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  genderContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 30,
-  },
-  genderButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#F5F5F5',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  genderButtonActive: {
-    backgroundColor: '#D32F2F',
-  },
-  genderIcon: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  genderIconText: {
-    fontSize: 32,
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  bloodGroupContainer: {
-    backgroundColor: '#FFE4E1',
-    borderRadius: 16,
-    padding: 16,
-  },
-  bloodGroupRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 12,
-  },
-  bloodGroupButton: {
-    width: 50,
-    height: 40,
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-  },
-  bloodGroupButtonActive: {
-    backgroundColor: '#D32F2F',
-    borderColor: '#D32F2F',
-  },
-  bloodGroupText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#222',
-  },
-  bloodGroupTextActive: {
-    color: '#fff',
-  },
-  checkboxContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 30,
-  },
-  checkbox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  checkboxBox: {
-    width: 20,
-    height: 20,
-    borderWidth: 2,
-    borderColor: '#E0E0E0',
-    borderRadius: 4,
-    marginRight: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkboxBoxChecked: {
-    backgroundColor: '#D32F2F',
-    borderColor: '#D32F2F',
-  },
-  checkboxCheck: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  checkboxText: {
-    fontSize: 14,
-    color: '#222',
-    flex: 1,
-  },
-  confirmButton: {
-    backgroundColor: '#D32F2F',
-    borderRadius: 12,
-    paddingVertical: 16,
-    marginHorizontal: 20,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  confirmButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  bottomNav: {
-    height: 70,
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderColor: '#eee',
-    paddingHorizontal: 8,
-  },
-  navItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  navItemActive: {
-    // Active state styling if needed
-  },
-  navIcon: {
-    width: 28,
-    height: 28,
-    marginBottom: 2,
-    tintColor: '#999',
-  },
-  navIconActive: {
-    tintColor: '#D32F2F',
-  },
-  navText: {
-    fontSize: 12,
-    color: '#999',
-  },
-  navTextActive: {
-    color: '#D32F2F',
-    fontWeight: '500',
-  },
-  badgeContainer: {
-    position: 'absolute',
-    top: -2,
-    right: 8,
-    backgroundColor: '#D32F2F',
-    borderRadius: 8,
-    minWidth: 16,
-    height: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badge: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        paddingTop: Platform.OS === 'ios' ? 50 : 40,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+    },
+    backButton: {
+        padding: 8,
+    },
+    headerTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#333',
+    },
+    placeholder: {
+        width: 40,
+    },
+    progressContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 20,
+        gap: 12,
+    },
+    progressDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: '#ddd',
+    },
+    progressDotActive: {
+        backgroundColor: '#C62828',
+        width: 30,
+    },
+    pageContainer: {
+        flex: 1,
+        paddingHorizontal: 20,
+        paddingTop: 10,
+    },
+    pageTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 20,
+    },
+    label: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+        marginBottom: 8,
+        marginTop: 12,
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        fontSize: 16,
+        backgroundColor: '#f9f9f9',
+    },
+    helperText: {
+        fontSize: 12,
+        color: '#666',
+        marginTop: 4,
+        marginBottom: 8,
+    },
+    genderContainer: {
+        flexDirection: 'row',
+        gap: 12,
+        marginBottom: 16,
+    },
+    genderButton: {
+        flex: 1,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        backgroundColor: '#f9f9f9',
+        alignItems: 'center',
+    },
+    genderButtonActive: {
+        backgroundColor: '#C62828',
+        borderColor: '#C62828',
+    },
+    genderButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#666',
+    },
+    genderButtonTextActive: {
+        color: '#fff',
+    },
+    datePickerButton: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        backgroundColor: '#f9f9f9',
+    },
+    datePickerText: {
+        fontSize: 16,
+        color: '#333',
+    },
+    bloodGroupContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 16,
+        marginBottom: 20,
+        justifyContent: 'center',
+    },
+    bloodGroupButton: {
+        paddingVertical: 16,
+        paddingHorizontal: 24,
+        borderRadius: 12,
+        backgroundColor: '#FFE4E6',
+        minWidth: 85,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 3,
+    },
+    bloodGroupButtonActive: {
+        backgroundColor: '#C62828',
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    bloodGroupButtonText: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#C62828',
+    },
+    bloodGroupButtonTextActive: {
+        color: '#fff',
+    },
+    mapContainer: {
+        flex: 1,
+        marginTop: 16,
+        overflow: 'hidden',
+        minHeight: 400,
+    },
+    addressContainer: {
+        marginTop: 16,
+        padding: 12,
+        backgroundColor: '#f9f9f9',
+        borderRadius: 8,
+        marginBottom: 16,
+    },
+    addressLabel: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#666',
+        marginBottom: 4,
+    },
+    addressText: {
+        fontSize: 14,
+        color: '#333',
+    },
+    buttonContainer: {
+        paddingHorizontal: 20,
+        paddingVertical: 16,
+        borderTopWidth: 1,
+        borderTopColor: '#f0f0f0',
+    },
+    nextButton: {
+        backgroundColor: '#C62828',
+        paddingVertical: 16,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    nextButtonDisabled: {
+        backgroundColor: '#999',
+    },
+    nextButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
+    },
 });

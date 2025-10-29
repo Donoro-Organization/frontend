@@ -14,16 +14,19 @@ export interface FacebookAuthResult {
 }
 
 export const useFacebookAuth = () => {
-  const redirectUri = makeRedirectUri({
-    scheme: "donoro",
-    preferLocalhost: false,
-  });
+  const redirectUri = makeRedirectUri({ native:`fb${config.FACEBOOK_APP_ID}://authorize` });
 
   const [request, response, promptAsync] = Facebook.useAuthRequest({
     clientId: config.FACEBOOK_APP_ID,
     redirectUri: redirectUri,
   });
 
+  if(request)
+  {
+    console.log("Facebook Request Redirect URI:", request.redirectUri);
+  }
+
+  // console.log("Facebook Redirect URI:", redirectUri);
 
   return {
     request,

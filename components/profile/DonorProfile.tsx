@@ -68,8 +68,7 @@ export default function UserProfile({ user, isOwnProfile }: UserProfileProps) {
     };
 
     const handleEditProfile = () => {
-        // TODO: Navigate to edit profile page
-        console.log('Edit profile');
+        router.push('/edit-profile');
     };
 
     const handleAddPost = () => {
