@@ -18,16 +18,6 @@ const paperTheme = {
   },
 };
 
-const paperTheme = {
-  ...MD3LightTheme,
-  colors: {
-    ...MD3LightTheme.colors,
-    primary: '#D32F2F',
-    secondary: '#FF5252',
-    error: '#D32F2F',
-  },
-};
-
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({

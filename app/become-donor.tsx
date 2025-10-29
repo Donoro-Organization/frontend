@@ -33,6 +33,7 @@ export default function BecomeDonor() {
     const [showLastDonationPicker, setShowLastDonationPicker] = useState(false);
     const [birthDate, setBirthDate] = useState<Date>(new Date());
     const [lastDonationDate, setLastDonationDate] = useState<Date>(new Date());
+    const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
     const [formData, setFormData] = useState<DonorSignupData>({
         first_name: '',
@@ -51,6 +52,13 @@ export default function BecomeDonor() {
     useEffect(() => {
         loadUserData();
     }, []);
+
+    // Set loading when entering page 3 without address
+    useEffect(() => {
+        if (currentPage === 3 && !formData.address) {
+            setIsLoadingLocation(true);
+        }
+    }, [currentPage, formData.address]);
 
     const loadUserData = async () => {
         try {
@@ -147,6 +155,7 @@ export default function BecomeDonor() {
     };
 
     const handleLocationSelect = (location: SelectedLocation) => {
+        setIsLoadingLocation(false);
         setFormData((prev) => ({
             ...prev,
             latitude: location.latitude.toString(),
@@ -391,7 +400,9 @@ export default function BecomeDonor() {
         <View style={styles.pageContainer}>
             <Text style={styles.pageTitle}>Select Your Location</Text>
             <Text style={styles.helperText}>
-                {formData.address || 'Choose your location so people can find you when they need blood'}
+                {isLoadingLocation
+                    ? 'Loading address...'
+                    : formData.address || 'Choose your location so people can find you when they need blood'}
             </Text>
 
             <View style={styles.mapContainer}>

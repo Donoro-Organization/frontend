@@ -14,6 +14,5 @@ const config = {
   ENV: Constants.expoConfig?.extra?.ENV || "prod",
 };
 
-console.log("Config loaded:", config);
 
 export default config;

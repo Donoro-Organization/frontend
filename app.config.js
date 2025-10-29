@@ -60,6 +60,7 @@ export default {
     experiments: {
       typedRoutes: true,
     },
+    scheme: ["donoro", `fb${process.env.FACEBOOK_APP_ID}`],
     extra: {
       BACKEND_API_ENDPOINT: process.env.BACKEND_API_ENDPOINT,
       GOOGLE_WEB_CLIENT_ID: process.env.GOOGLE_WEB_CLIENT_ID,
@@ -67,6 +68,7 @@ export default {
       GOOGLE_IOS_CLIENT_ID: process.env.GOOGLE_IOS_CLIENT_ID,
       FACEBOOK_APP_ID: process.env.FACEBOOK_APP_ID,
       FACEBOOK_APP_SECRET: process.env.FACEBOOK_APP_SECRET,
+      FACEBOOK_CLIENT_TOKEN: process.env.FACEBOOK_CLIENT_TOKEN,
       GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
       ENV: process.env.ENV,
       eas: {

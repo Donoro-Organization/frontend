@@ -336,6 +336,10 @@ export default function LocationPicker({
                 // Reverse geocode to get a valid address
                 const { name, address } = await resolvePlaceName(coords.latitude, coords.longitude);
 
+                if (!isMounted) {
+                    return;
+                }
+
                 const location: SelectedLocation = {
                     name,
                     latitude: coords.latitude,
@@ -356,7 +360,11 @@ export default function LocationPicker({
                 console.log("Setting initial location:", locationKey, "with address:", address);
                 setSelectedLocation(location);
                 setRegion(nextRegion);
-                onLocationSelect(location);
+
+                // Call parent callback after state is set
+                setTimeout(() => {
+                    onLocationSelect(location);
+                }, 100);
 
                 hasSetInitialLocation.current = true;
             } catch (error) {
@@ -404,7 +412,7 @@ export default function LocationPicker({
         return (
             <View style={styles.searchWrapper}>
                 <View style={styles.textInputWrapper}>
-                    <Ionicons name="search" size={20} color="#9ea0a6" style={styles.searchIcon} />
+                    <Ionicons name="search" size={18} color="#9ea0a6" style={styles.searchIcon} />
                     <TextInput
                         style={styles.textInput}
                         placeholder="Search for a place..."
@@ -423,7 +431,7 @@ export default function LocationPicker({
                             }}
                             style={styles.clearButton}
                         >
-                            <Ionicons name="close-circle" size={20} color="#9ea0a6" />
+                            <Ionicons name="close-circle" size={18} color="#9ea0a6" />
                         </TouchableOpacity>
                     )}
                     {isSearching && (
@@ -441,7 +449,7 @@ export default function LocationPicker({
                                     style={styles.suggestionItem}
                                     onPress={() => handleSuggestionPress(item)}
                                 >
-                                    <Ionicons name="location-outline" size={20} color="#666" style={styles.suggestionIcon} />
+                                    <Ionicons name="location-outline" size={18} color="#666" style={styles.suggestionIcon} />
                                     <View style={styles.suggestionTextContainer}>
                                         <Text style={styles.suggestionTextMain}>{item.mainText}</Text>
                                         {item.secondaryText && (
@@ -537,14 +545,14 @@ const styles = StyleSheet.create({
         shadowOpacity: 0,
     },
     searchContainer: {
-        padding: 12,
+        padding: 8,
         zIndex: 2,
     },
     searchContainerExpanded: {
         padding: 0,
-        paddingTop: 12,
-        paddingHorizontal: 12,
-        paddingBottom: 12,
+        paddingTop: 8,
+        paddingHorizontal: 8,
+        paddingBottom: 8,
     },
     searchWrapper: {
         position: "relative",
@@ -553,49 +561,49 @@ const styles = StyleSheet.create({
     searchFallback: {
         flexDirection: "row",
         alignItems: "center",
-        paddingHorizontal: 14,
-        paddingVertical: 12,
+        paddingHorizontal: 10,
+        paddingVertical: 8,
         backgroundColor: "#f9dede",
-        borderRadius: 12,
+        borderRadius: 8,
     },
     searchFallbackIcon: {
-        marginRight: 8,
+        marginRight: 6,
     },
     searchFallbackText: {
         color: "#a11",
-        fontSize: 13,
+        fontSize: 12,
         flex: 1,
     },
     textInputWrapper: {
         flexDirection: "row",
         alignItems: "center",
         backgroundColor: "#fff",
-        borderRadius: 12,
+        borderRadius: 8,
         borderWidth: 1,
         borderColor: "#e0e0e0",
-        paddingHorizontal: 12,
+        paddingHorizontal: 10,
     },
     searchIcon: {
-        marginRight: 8,
+        marginRight: 6,
     },
     textInput: {
         flex: 1,
-        height: 48,
-        fontSize: 15,
+        height: 38,
+        fontSize: 14,
         color: "#222",
     },
     clearButton: {
-        padding: 4,
-        marginLeft: 4,
+        padding: 3,
+        marginLeft: 3,
     },
     searchingIndicator: {
-        marginLeft: 8,
+        marginLeft: 6,
     },
     suggestionsList: {
         backgroundColor: "#fff",
-        borderRadius: 12,
-        marginTop: 8,
-        maxHeight: 250,
+        borderRadius: 8,
+        marginTop: 6,
+        maxHeight: 200,
         borderWidth: 1,
         borderColor: "#e0e0e0",
         shadowColor: "#000",
@@ -607,27 +615,27 @@ const styles = StyleSheet.create({
     suggestionItem: {
         flexDirection: "row",
         alignItems: "center",
-        paddingVertical: 14,
-        paddingHorizontal: 16,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: "#ececec",
     },
     suggestionIcon: {
-        marginRight: 12,
+        marginRight: 10,
     },
     suggestionTextContainer: {
         flex: 1,
     },
     suggestionTextMain: {
         color: "#222",
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: "600",
-        marginBottom: 4,
+        marginBottom: 2,
     },
     suggestionTextSecondary: {
         color: "#666",
-        fontSize: 13,
-        lineHeight: 18,
+        fontSize: 12,
+        lineHeight: 16,
     },
     mapWrapper: {
         flex: 1,

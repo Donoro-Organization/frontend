@@ -1,5 +1,6 @@
 import * as Facebook from "expo-auth-session/providers/facebook";
 import * as WebBrowser from "expo-web-browser";
+import { makeRedirectUri } from "expo-auth-session";
 import config from "../config/config";
 
 WebBrowser.maybeCompleteAuthSession();
@@ -13,9 +14,16 @@ export interface FacebookAuthResult {
 }
 
 export const useFacebookAuth = () => {
+  const redirectUri = makeRedirectUri({
+    scheme: "donoro",
+    preferLocalhost: false,
+  });
+
   const [request, response, promptAsync] = Facebook.useAuthRequest({
     clientId: config.FACEBOOK_APP_ID,
+    redirectUri: redirectUri,
   });
+
 
   return {
     request,
