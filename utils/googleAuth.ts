@@ -29,8 +29,6 @@ export const useGoogleAuth = () => {
     console.log("Google Request Redirect URI:", request.redirectUri);
   }
 
-  // console.log("Google Redirect URI:", redirectUri);
-
   return {
     request,
     response,

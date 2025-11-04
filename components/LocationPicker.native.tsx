@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
     ActivityIndicator,
     Dimensions,
-    FlatList,
+    ScrollView,
     LayoutAnimation,
     Platform,
     StyleSheet,
@@ -441,11 +441,14 @@ export default function LocationPicker({
 
                 {showSuggestions && suggestions.length > 0 && (
                     <View style={styles.suggestionsList}>
-                        <FlatList
-                            data={suggestions}
-                            keyExtractor={(item) => item.placeId}
-                            renderItem={({ item }) => (
+                        <ScrollView
+                            keyboardShouldPersistTaps="handled"
+                            nestedScrollEnabled
+                            showsVerticalScrollIndicator={false}
+                        >
+                            {suggestions.map((item) => (
                                 <TouchableOpacity
+                                    key={item.placeId}
                                     style={styles.suggestionItem}
                                     onPress={() => handleSuggestionPress(item)}
                                 >
@@ -457,10 +460,8 @@ export default function LocationPicker({
                                         )}
                                     </View>
                                 </TouchableOpacity>
-                            )}
-                            keyboardShouldPersistTaps="handled"
-                            nestedScrollEnabled
-                        />
+                            ))}
+                        </ScrollView>
                     </View>
                 )}
             </View>

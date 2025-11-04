@@ -67,3 +67,45 @@ export interface PaginatedInvitationsResponse {
   total: number;
   total_pages: number;
 }
+
+// Request types for creating blood requests
+export interface BloodRequestCreateRequest {
+  blood_group: BloodGroup;
+  patient_condition?: string;
+  location: string;
+  latitude: string;
+  longitude: string;
+  required_datetime: string; // ISO format
+  quantity?: number;
+}
+
+export interface BulkDonorInvitationItemRequest {
+  donor_id: string;
+  notes?: string;
+}
+
+export interface BulkDonorInvitationCreateRequest {
+  blood_request: BloodRequestCreateRequest;
+  donor_invitations: BulkDonorInvitationItemRequest[];
+}
+
+// Request types for creating blood requests
+export interface BloodRequestCreateRequest {
+  blood_group: BloodGroup;
+  patient_condition?: string;
+  location: string;
+  latitude: string;
+  longitude: string;
+  required_datetime: string; // ISO format
+  quantity?: number;
+}
+
+export interface BulkDonorInvitationItemRequest {
+  donor_id: string;
+  notes?: string;
+}
+
+export interface BulkDonorInvitationCreateRequest {
+  blood_request: BloodRequestCreateRequest;
+  donor_invitations: BulkDonorInvitationItemRequest[];
+}

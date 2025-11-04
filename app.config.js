@@ -22,11 +22,14 @@ export default {
       infoPlist: {
         CFBundleURLTypes: [
           {
-            CFBundleURLSchemes: ["com.donoro.app", `fb${process.env.FACEBOOK_APP_ID}`]
-          }
+            CFBundleURLSchemes: [
+              "com.donoro.app",
+              `fb${process.env.FACEBOOK_APP_ID}`,
+            ],
+          },
         ],
-        LSApplicationQueriesSchemes: ["fbapi", "fb-messenger-share-api"]
-      }
+        LSApplicationQueriesSchemes: ["fbapi", "fb-messenger-share-api"],
+      },
     },
     android: {
       adaptiveIcon: {
@@ -46,15 +49,16 @@ export default {
           autoVerify: true,
           data: [
             {
-              scheme: "com.donoro.app"
+              scheme: "com.donoro.app",
             },
             {
-              scheme: `fb${process.env.FACEBOOK_APP_ID}`
-            }
+              scheme: `fb${process.env.FACEBOOK_APP_ID}`,
+            },
           ],
-          category: ["BROWSABLE", "DEFAULT"]
-        }
-      ]
+          category: ["BROWSABLE", "DEFAULT"],
+        },
+      ],
+      googleServicesFile: "./google-services.json",
     },
     web: {
       bundler: "metro",
@@ -78,13 +82,14 @@ export default {
             usesCleartextTraffic: true,
           },
         },
-      ],
+      ]
     ],
     experiments: {
       typedRoutes: true,
     },
     extra: {
       BACKEND_API_ENDPOINT: process.env.BACKEND_API_ENDPOINT,
+      BACKEND_SOCKET_ENDPOINT: process.env.BACKEND_SOCKET_ENDPOINT,
       GOOGLE_WEB_CLIENT_ID: process.env.GOOGLE_WEB_CLIENT_ID,
       GOOGLE_ANDROID_CLIENT_ID: process.env.GOOGLE_ANDROID_CLIENT_ID,
       GOOGLE_IOS_CLIENT_ID: process.env.GOOGLE_IOS_CLIENT_ID,

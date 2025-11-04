@@ -9,6 +9,7 @@ import {
     Platform,
     Image,
     ActivityIndicator,
+    KeyboardAvoidingView,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,6 +22,7 @@ import { apiCall } from '@/hooks/useAPI';
 import ErrorDialog from '@/components/ErrorDialog';
 import SuccessDialog from '@/components/SuccessDialog';
 import LocationPicker, { SelectedLocation } from '@/components/LocationPicker';
+import BloodGroupPicker from '@/components/BloodGroupPicker';
 
 interface EditProfileProps {
     user: User;
@@ -269,7 +271,11 @@ export default function EditProfile({ user, donorData, onSave }: EditProfileProp
     };
 
     return (
-        <View style={styles.container}>
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -289,7 +295,11 @@ export default function EditProfile({ user, donorData, onSave }: EditProfileProp
                 </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+            <ScrollView
+                style={styles.scrollView}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+            >
                 {/* Profile Image Section */}
                 <View style={styles.imageSection}>
                     <View style={styles.imageContainer}>
@@ -454,31 +464,12 @@ export default function EditProfile({ user, donorData, onSave }: EditProfileProp
                         <Text style={styles.sectionTitle}>Donor Information</Text>
 
                         <Text style={styles.label}>Blood Group</Text>
-                        <View style={styles.bloodGroupContainer}>
-                            {Object.values(BloodGroup).map((group) => (
-                                <TouchableOpacity
-                                    key={group}
-                                    style={[
-                                        styles.bloodGroupButton,
-                                        formData.blood_group === group &&
-                                        styles.bloodGroupButtonActive,
-                                    ]}
-                                    onPress={() =>
-                                        setFormData({ ...formData, blood_group: group })
-                                    }
-                                >
-                                    <Text
-                                        style={[
-                                            styles.bloodGroupButtonText,
-                                            formData.blood_group === group &&
-                                            styles.bloodGroupButtonTextActive,
-                                        ]}
-                                    >
-                                        {group}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
+                        <BloodGroupPicker
+                            value={formData.blood_group as BloodGroup | ""}
+                            onChange={(bloodGroup: BloodGroup) =>
+                                setFormData({ ...formData, blood_group: bloodGroup })
+                            }
+                        />
 
                         <Text style={styles.label}>Last Donation Date (Optional)</Text>
                         {Platform.OS === 'web' ? (
@@ -586,7 +577,7 @@ export default function EditProfile({ user, donorData, onSave }: EditProfileProp
                 message={successMessage}
                 onClose={() => setShowSuccess(false)}
             />
-        </View>
+        </KeyboardAvoidingView>
     );
 }
 
@@ -755,43 +746,6 @@ const styles = StyleSheet.create({
     datePickerText: {
         fontSize: 16,
         color: '#333',
-    },
-    bloodGroupContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 16,
-        marginBottom: 8,
-        justifyContent: 'center',
-    },
-    bloodGroupButton: {
-        paddingVertical: 16,
-        paddingHorizontal: 24,
-        borderRadius: 12,
-        backgroundColor: '#FFE4E6',
-        minWidth: 85,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 3,
-    },
-    bloodGroupButtonActive: {
-        backgroundColor: '#C62828',
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 5,
-    },
-    bloodGroupButtonText: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#C62828',
-    },
-    bloodGroupButtonTextActive: {
-        color: '#fff',
     },
     mapContainer: {
         height: 320,

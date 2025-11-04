@@ -1,0 +1,30 @@
+export const PATIENT_CONDITION_SUGGESTIONS = [
+  "Routine transfusion required - Chronic condition",
+  "Post-surgery recovery - Blood support needed",
+  "Scheduled medical procedure - Blood requested in advance",
+  "Hospital patient - Blood support required for treatment",
+  "Low blood count - Ongoing monitoring and transfusion needed",
+  "Urgent care - Blood required for stabilization",
+  "Neonatal care - Infant requires blood transfusion",
+  "High-risk pregnancy - Blood backup needed",
+  "Severe infection - Supportive transfusion requested",
+  "Surgical operation - Blood type-specific units requested",
+];
+
+export const DONOR_NOTE_SUGGESTIONS = [
+  "A patient urgently needs your blood type — your donation can save their life.",
+  "Your timely donation is critical to support a patient in need.",
+  "Your help is urgently needed — please donate as soon as possible.",
+  "Lives depend on your kindness — your donation will make an immediate impact.",
+  "Your blood type is in urgent demand — your support can bring hope to a family.",
+  "Please proceed to donate — your action today can save someone’s tomorrow.",
+  "A patient is waiting — your swift response will make a life-saving difference.",
+  "Your blood donation is needed now more than ever — thank you for stepping up.",
+  "This is an urgent call for help — your donation will directly save a life.",
+  "Your generosity keeps hope alive — please donate without delay.",
+  "A life hangs in the balance — your donation will bring immediate relief.",
+  "Your continued support ensures patients receive the care they need.",
+  "Every second counts — your prompt donation can change someone’s fate.",
+  "Your act of kindness today will bring healing and hope to someone in crisis.",
+  "Blood supplies are low — your donation is vital to save lives right now.",
+];

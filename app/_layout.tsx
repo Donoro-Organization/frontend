@@ -8,6 +8,8 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { PostUploadProvider } from '@/contexts/PostUploadContext';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { PushNotificationProvider } from '@/contexts/PushNotificationContext';
+import { NotificationProvider } from '@/contexts/NotificationContext';
 
 const paperTheme = {
   ...MD3LightTheme,
@@ -32,18 +34,18 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <PostUploadProvider>
-        <PaperProvider theme={paperTheme}>
-          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-            <Stack>
-              <Stack.Screen name="dev-menu" options={{ headerShown: false }} />
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-            <StatusBar style="auto" />
-          </ThemeProvider>
-        </PaperProvider>
-      </PostUploadProvider>
+      <PushNotificationProvider>
+        <NotificationProvider>
+          <PostUploadProvider>
+            <PaperProvider theme={paperTheme}>
+              <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                <Stack screenOptions={{ headerShown: false }} />
+                <StatusBar style="auto" />
+              </ThemeProvider>
+            </PaperProvider>
+          </PostUploadProvider>
+        </NotificationProvider>
+      </PushNotificationProvider>
     </AuthProvider>
   );
 }

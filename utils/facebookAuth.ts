@@ -26,7 +26,6 @@ export const useFacebookAuth = () => {
     console.log("Facebook Request Redirect URI:", request.redirectUri);
   }
 
-  // console.log("Facebook Redirect URI:", redirectUri);
 
   return {
     request,

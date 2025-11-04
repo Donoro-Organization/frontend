@@ -19,6 +19,7 @@ import { BloodGroup } from '@/types/bloodRequest';
 import { apiCall } from '@/hooks/useAPI';
 import { getUserId } from '@/utils/storage';
 import LocationPicker, { SelectedLocation } from '@/components/LocationPicker';
+import BloodGroupPicker from '@/components/BloodGroupPicker';
 import ErrorDialog from '@/components/ErrorDialog';
 import SuccessDialog from '@/components/SuccessDialog';
 import { formatDateToDhaka } from '@/utils/time';
@@ -325,27 +326,12 @@ export default function BecomeDonor() {
             <Text style={styles.pageTitle}>Donor Information</Text>
 
             <Text style={styles.label}>Select Blood Group</Text>
-            <View style={styles.bloodGroupContainer}>
-                {Object.values(BloodGroup).map((group) => (
-                    <TouchableOpacity
-                        key={group}
-                        style={[
-                            styles.bloodGroupButton,
-                            formData.blood_group === group && styles.bloodGroupButtonActive,
-                        ]}
-                        onPress={() => setFormData({ ...formData, blood_group: group })}
-                    >
-                        <Text
-                            style={[
-                                styles.bloodGroupButtonText,
-                                formData.blood_group === group && styles.bloodGroupButtonTextActive,
-                            ]}
-                        >
-                            {group}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
+            <BloodGroupPicker
+                value={formData.blood_group as BloodGroup | ""}
+                onChange={(bloodGroup: BloodGroup) =>
+                    setFormData({ ...formData, blood_group: bloodGroup })
+                }
+            />
 
             <Text style={styles.label}>Last Donation Date (Optional)</Text>
             {Platform.OS === 'web' ? (
@@ -613,43 +599,6 @@ const styles = StyleSheet.create({
     datePickerText: {
         fontSize: 16,
         color: '#333',
-    },
-    bloodGroupContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 16,
-        marginBottom: 20,
-        justifyContent: 'center',
-    },
-    bloodGroupButton: {
-        paddingVertical: 16,
-        paddingHorizontal: 24,
-        borderRadius: 12,
-        backgroundColor: '#FFE4E6',
-        minWidth: 85,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 3,
-    },
-    bloodGroupButtonActive: {
-        backgroundColor: '#C62828',
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 5,
-    },
-    bloodGroupButtonText: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#C62828',
-    },
-    bloodGroupButtonTextActive: {
-        color: '#fff',
     },
     mapContainer: {
         flex: 1,

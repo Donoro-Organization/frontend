@@ -2,6 +2,8 @@ import Constants from "expo-constants";
 
 const config = {
   BACKEND_API_ENDPOINT: Constants.expoConfig?.extra?.BACKEND_API_ENDPOINT || "",
+  BACKEND_SOCKET_ENDPOINT:
+    Constants.expoConfig?.extra?.BACKEND_SOCKET_ENDPOINT || "",
   GOOGLE_WEB_CLIENT_ID: Constants.expoConfig?.extra?.GOOGLE_WEB_CLIENT_ID || "",
   GOOGLE_ANDROID_CLIENT_ID:
     Constants.expoConfig?.extra?.GOOGLE_ANDROID_CLIENT_ID || "",
@@ -13,6 +15,5 @@ const config = {
   GOOGLE_MAPS_API_KEY: Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY || "",
   ENV: Constants.expoConfig?.extra?.ENV || "prod",
 };
-
 
 export default config;

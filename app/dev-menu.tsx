@@ -10,13 +10,13 @@ export default function DevMenu() {
     const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
 
     // Get current user ID
-        useEffect(() => {
-            const loadCurrentUserId = async () => {
-                const userId = await getUserId();
-                setCurrentUserId(userId);
-            };
-            loadCurrentUserId();
-        }, []);
+    useEffect(() => {
+        const loadCurrentUserId = async () => {
+            const userId = await getUserId();
+            setCurrentUserId(userId);
+        };
+        loadCurrentUserId();
+    }, []);
 
     const screens = [
         // Auth screens
@@ -30,17 +30,19 @@ export default function DevMenu() {
         // Donor screens
         { name: 'Become Donor', route: '/become-donor', icon: 'heart' },
         { name: 'Donor Appointments', route: '/donor-appointments', icon: 'calendar' },
+        { name: 'Search Donors', route: '/search-donors', icon: 'search' },
 
         // User screens
         { name: 'User Profile', route: `/profile/${currentUserId}`, icon: 'user' },
         { name: 'User Appointments', route: '/user-appointments', icon: 'calendar' },
+        { name: "Notifications", route: "/notifications", icon: "bell" },
 
 
         // Post screens
         { name: 'Create Post', route: '/create-post', icon: 'plus-square' },
         { name: 'Edit Post', route: '/edit-post', icon: 'edit' },
-        {name: "Location Picker", route: "/location-example", icon: "map-pin"},
-        
+        { name: "Location Picker", route: "/location-example", icon: "map-pin" },
+
         // Other
         { name: 'Loading', route: '/loading', icon: 'loader' },
     ];
