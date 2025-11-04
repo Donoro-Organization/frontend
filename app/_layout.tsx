@@ -6,6 +6,7 @@ import { PaperProvider, MD3LightTheme } from 'react-native-paper';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useNotificationObserver } from '@/hooks/useNotification';
 import { PostUploadProvider } from '@/contexts/PostUploadContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { PushNotificationProvider } from '@/contexts/PushNotificationContext';
@@ -23,6 +24,7 @@ const paperTheme = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  useNotificationObserver();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });

@@ -2,13 +2,12 @@ import React, { createContext, useContext, useEffect, useState, useRef } from 'r
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
-import { Platform, View, ActivityIndicator, StyleSheet } from 'react-native';
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DeviceInfo from 'react-native-device-info';
 import { apiCall } from '@/hooks/useAPI';
 import * as Crypto from 'expo-crypto';
 import { DeviceRegistrationRequest, DeviceCheckResponse, DevicePlatform } from '@/types/device';
-import { router } from 'expo-router';
 
 const PushNotificationContext = createContext<PushNotificationContextType | undefined>(undefined);
 
@@ -36,97 +35,7 @@ export function PushNotificationProvider({ children }: { children: React.ReactNo
     const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
     const [deviceId, setDeviceId] = useState<string | null>(null);
     const [notification, setNotification] = useState<Notifications.Notification | null>(null);
-    const [isCheckingInitialNotification, setIsCheckingInitialNotification] = useState(true);
     const notificationListener = useRef<Notifications.EventSubscription | null>(null);
-    const responseListener = useRef<Notifications.EventSubscription | null>(null);
-    const hasHandledInitialNotification = useRef(false);
-
-    // Handle notification response (tap)
-    const handleNotificationResponse = (response: Notifications.NotificationResponse) => {
-        console.log('Handling notification tap:', response);
-
-        const data = response.notification.request.content.data;
-        const notificationId = data?.id as string;
-        const link = data?.link as string;
-
-        // Mark notification as read in background (non-blocking)
-        if (notificationId) {
-            // Fire and forget - don't wait for completion
-            (async () => {
-                try {
-                    await apiCall(`/notifications/${notificationId}/read`, {
-                        method: 'PATCH'
-                    });
-                    console.log('Notification marked as read:', notificationId);
-
-                    // Update local storage
-                    const stored = await AsyncStorage.getItem('@notifications');
-                    if (stored) {
-                        const notifications = JSON.parse(stored);
-                        const updated = notifications.map((n: any) =>
-                            n.id === notificationId ? { ...n, is_read: true } : n
-                        );
-                        await AsyncStorage.setItem('@notifications', JSON.stringify(updated));
-                    }
-                } catch (error) {
-                    console.error('Error marking notification as read:', error);
-                }
-            })();
-        }
-
-        // Navigate immediately (don't wait for mark as read)
-        if (link) {
-            console.log('Navigating to:', link);
-            try {
-                router.push(link as any);
-            } catch (error) {
-                console.error('Navigation error:', error);
-                // Fallback to notifications page if navigation fails
-                router.push('/notifications' as any);
-            }
-        } else {
-            // Default: navigate to notifications page if no link provided
-            console.log('No link found, navigating to notifications');
-            router.push('/notifications' as any);
-        }
-    };
-
-    // Check for notification that launched the app (cold start)
-    useEffect(() => {
-        const checkInitialNotification = async () => {
-            if (hasHandledInitialNotification.current) {
-                setIsCheckingInitialNotification(false);
-                return;
-            }
-
-            try {
-                const response = await Notifications.getLastNotificationResponseAsync();
-
-                if (response) {
-                    console.log('App launched from notification (cold start):', response);
-                    hasHandledInitialNotification.current = true;
-
-                    // Show app immediately
-                    setIsCheckingInitialNotification(false);
-
-                    // Navigate ASAP - use minimal delay for router to be ready
-                    // This will cause a brief home screen flash, but it's the only reliable way
-                    setTimeout(() => {
-                        handleNotificationResponse(response);
-                    }, 300); 
-                } else {
-                    console.log('No initial notification found');
-                    setIsCheckingInitialNotification(false);
-                }
-            } catch (error) {
-                console.error('Error checking initial notification:', error);
-                setIsCheckingInitialNotification(false);
-            }
-        };
-
-        // Check immediately on mount
-        checkInitialNotification();
-    }, []);
 
     useEffect(() => {
         initializePushNotifications();
@@ -137,18 +46,9 @@ export function PushNotificationProvider({ children }: { children: React.ReactNo
             setNotification(notification);
         });
 
-        // Listen for user tapping on notification (app in foreground or background)
-        responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
-            console.log('Notification tapped (app running):', response);
-            handleNotificationResponse(response);
-        });
-
         return () => {
             if (notificationListener.current) {
                 notificationListener.current.remove();
-            }
-            if (responseListener.current) {
-                responseListener.current.remove();
             }
         };
     }, []);
@@ -373,15 +273,6 @@ export function PushNotificationProvider({ children }: { children: React.ReactNo
         notification,
     };
 
-    // Show loading spinner while checking for initial notification to prevent flash
-    if (isCheckingInitialNotification) {
-        return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#DC2626" />
-            </View>
-        );
-    }
-
     return (
         <PushNotificationContext.Provider value={value}>
             {children}
@@ -396,15 +287,6 @@ export function usePushNotifications() {
     }
     return context;
 }
-
-const styles = StyleSheet.create({
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#fff',
-    },
-});
 
 // Utility functions
 function formatHashAsUUID(hashHex: string): string {
