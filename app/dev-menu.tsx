@@ -29,12 +29,11 @@ export default function DevMenu() {
 
         // Donor screens
         { name: 'Become Donor', route: '/become-donor', icon: 'heart' },
-        { name: 'Donor Appointments', route: '/donor-appointments', icon: 'calendar' },
         { name: 'Search Donors', route: '/search-donors', icon: 'search' },
 
         // User screens
         { name: 'User Profile', route: `/profile/${currentUserId}`, icon: 'user' },
-        { name: 'User Appointments', route: '/user-appointments', icon: 'calendar' },
+        { name: 'Appointments', route: '/appointments', icon: 'calendar' },
         { name: "Notifications", route: "/notifications", icon: "bell" },
 
 

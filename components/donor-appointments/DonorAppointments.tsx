@@ -26,10 +26,12 @@ import CompletedInvitationCard from './CompletedInvitationCard';
 import CancelledInvitationCard from './CancelledInvitationCard';
 import AppointmentDetails from './AppointmentDetails';
 import { getUserId } from '@/utils/storage';
+import ErrorDialog from '@/components/ErrorDialog';
+import SuccessDialog from '@/components/SuccessDialog';
+import StatusTabs from '@/components/StatusTabs';
 
 
 type StatusTab = 'accepted' | 'pending' | 'completed' | 'cancelled';
-
 
 export default function DonorAppointments() {
     const [activeTab, setActiveTab] = useState<StatusTab>('accepted');
@@ -37,6 +39,10 @@ export default function DonorAppointments() {
     const [selectedInvitation, setSelectedInvitation] = useState<DonorInvitation | null>(null);
     const [detailsModalVisible, setDetailsModalVisible] = useState(false);
     const [donorUserId, setDonorUserId] = useState<string | null>(null);
+    const [errorDialogVisible, setErrorDialogVisible] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successDialogVisible, setSuccessDialogVisible] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
     // Load user ID on mount
     React.useEffect(() => {
@@ -83,13 +89,16 @@ export default function DonorAppointments() {
             );
 
             if (response.status_code === 200) {
-                Alert.alert('Success', 'Invitation accepted successfully!');
+                setSuccessMessage('Invitation accepted successfully!');
+                setSuccessDialogVisible(true);
                 refetch();
             } else {
-                Alert.alert('Error', response.message || 'Failed to accept invitation');
+                setErrorMessage(response.message || 'Failed to accept invitation');
+                setErrorDialogVisible(true);
             }
         } catch (err) {
-            Alert.alert('Error', 'Failed to accept invitation. Please try again.');
+            setErrorMessage('Failed to accept invitation. Please try again.');
+            setErrorDialogVisible(true);
         }
     };
 
@@ -112,13 +121,16 @@ export default function DonorAppointments() {
                             );
 
                             if (response.status_code === 200) {
-                                Alert.alert('Success', 'Invitation declined');
+                                setSuccessMessage('Invitation declined');
+                                setSuccessDialogVisible(true);
                                 refetch();
                             } else {
-                                Alert.alert('Error', response.message || 'Failed to decline invitation');
+                                setErrorMessage(response.message || 'Failed to decline invitation');
+                                setErrorDialogVisible(true);
                             }
                         } catch (err) {
-                            Alert.alert('Error', 'Failed to decline invitation. Please try again.');
+                            setErrorMessage('Failed to decline invitation. Please try again.');
+                            setErrorDialogVisible(true);
                         }
                     },
                 },
@@ -127,13 +139,13 @@ export default function DonorAppointments() {
     };
 
     const handleViewDetails = (invitationId: string) => {
-        // Find the invitation in current data (either mock or API)
         const invitation = invitations.find(inv => inv.id === invitationId);
         if (invitation) {
             setSelectedInvitation(invitation);
             setDetailsModalVisible(true);
         } else {
-            Alert.alert('Error', 'Invitation not found');
+            setErrorMessage('Invitation not found');
+            setErrorDialogVisible(true);
         }
     };
 
@@ -151,17 +163,12 @@ export default function DonorAppointments() {
         }
     };
 
-    const renderTabButton = (tab: StatusTab, label: string) => (
-        <TouchableOpacity
-            key={tab}
-            style={[styles.tabButton, activeTab === tab && styles.activeTabButton]}
-            onPress={() => setActiveTab(tab)}
-        >
-            <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
-                {label}
-            </Text>
-        </TouchableOpacity>
-    );
+    const tabs = [
+        { key: 'accepted' as StatusTab, label: 'Upcoming' },
+        { key: 'pending' as StatusTab, label: 'Pending' },
+        { key: 'completed' as StatusTab, label: 'Completed' },
+        { key: 'cancelled' as StatusTab, label: 'Cancelled' },
+    ];
 
     const renderInvitationCard = (invitation: any, index: number) => {
         switch (activeTab) {
@@ -206,24 +213,8 @@ export default function DonorAppointments() {
 
     return (
         <View style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>Appointments</Text>
-            </View>
-
             {/* Tabs */}
-            <View style={styles.tabContainer}>
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.tabScrollContent}
-                >
-                    {renderTabButton('accepted', 'Upcoming')}
-                    {renderTabButton('pending', 'Pending')}
-                    {renderTabButton('completed', 'Completed')}
-                    {renderTabButton('cancelled', 'Cancelled')}
-                </ScrollView>
-            </View>
+            <StatusTabs activeTab={activeTab} onTabChange={setActiveTab} tabs={tabs} />
 
             {/* Content */}
             <ScrollView
@@ -293,6 +284,20 @@ export default function DonorAppointments() {
                     />
                 )}
             </Modal>
+
+            {/* Error Dialog */}
+            <ErrorDialog
+                visible={errorDialogVisible}
+                message={errorMessage}
+                onClose={() => setErrorDialogVisible(false)}
+            />
+
+            {/* Success Dialog */}
+            <SuccessDialog
+                visible={successDialogVisible}
+                message={successMessage}
+                onClose={() => setSuccessDialogVisible(false)}
+            />
         </View>
     );
 }
@@ -301,49 +306,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F5F5F5',
-    },
-    header: {
-        backgroundColor: '#fff',
-        paddingTop: 50,
-        paddingBottom: 16,
-        paddingHorizontal: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: '#E0E0E0',
-        alignItems: 'center',
-    },
-    headerTitle: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: '#222',
-    },
-    tabContainer: {
-        backgroundColor: '#fff',
-        borderBottomWidth: 1,
-        borderBottomColor: '#E0E0E0',
-        alignItems: 'center',
-    },
-    tabScrollContent: {
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        gap: 8,
-        flexGrow: 0,
-    },
-    tabButton: {
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        borderRadius: 20,
-        backgroundColor: '#F5F5F5',
-    },
-    activeTabButton: {
-        backgroundColor: '#D32F2F',
-    },
-    tabText: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: '#666',
-    },
-    activeTabText: {
-        color: '#fff',
     },
     content: {
         flex: 1,

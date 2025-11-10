@@ -173,7 +173,7 @@ export default function BloodRequestForm({
 
                 // Redirect after success
                 setTimeout(() => {
-                    router.push("/user-appointments");
+                    router.push("/appointments");
                 }, 2000);
             } else {
                 console.error("=== API ERROR RESPONSE ===", response);

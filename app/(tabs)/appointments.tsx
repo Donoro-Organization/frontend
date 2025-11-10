@@ -1,12 +1,11 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import UserAppointments from '@/components/user-appointments/UserAppointments';
+import Appointments from '@/components/Appointments';
 
-
-export default function UserAppointmentsScreen() {
+export default function AppointmentsScreen() {
     return (
         <View style={styles.container}>
-            <UserAppointments />
+            <Appointments />
         </View>
     );
 }
@@ -16,3 +15,4 @@ const styles = StyleSheet.create({
         flex: 1,
     },
 });
+

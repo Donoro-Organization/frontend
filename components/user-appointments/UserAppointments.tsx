@@ -21,6 +21,9 @@ import CompletedRequestCard from "./CompletedRequestCard";
 import CancelledRequestCard from "./CancelledRequestCard";
 import RequestDetails from "./RequestDetails";
 import { getUserId } from "@/utils/storage";
+import ErrorDialog from "@/components/ErrorDialog";
+import SuccessDialog from "@/components/SuccessDialog";
+import StatusTabs from "@/components/StatusTabs";
 
 type StatusTab = "accepted" | "pending" | "completed" | "cancelled";
 
@@ -30,6 +33,10 @@ export default function UserAppointments() {
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
   const [userID, setUserID] = useState<string | null>(null);
+  const [errorDialogVisible, setErrorDialogVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successDialogVisible, setSuccessDialogVisible] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   // Load user ID on mount
   React.useEffect(() => {
@@ -73,12 +80,14 @@ export default function UserAppointments() {
       setSelectedRequest(request);
       setDetailsModalVisible(true);
     } else {
-      Alert.alert("Error", "Request not found");
+      setErrorMessage("Request not found");
+      setErrorDialogVisible(true);
     }
   };
 
   const handleSearchDonors = (requestId: string) => {
-    Alert.alert("Search Donors", "Search functionality will be implemented");
+    setErrorMessage("Search functionality will be implemented");
+    setErrorDialogVisible(true);
     // TODO: Navigate to donor search screen or open search modal
   };
 
@@ -128,22 +137,23 @@ export default function UserAppointments() {
           // Close modal if open
           setDetailsModalVisible(false);
 
-          window.alert("Request cancelled successfully");
+          setSuccessMessage("Request cancelled successfully");
+          setSuccessDialogVisible(true);
           // Refresh the list
           await refetch();
         } else {
-          window.alert(
-            `Error: ${response.message || "Failed to cancel request"}`
-          );
+          setErrorMessage(response.message || "Failed to cancel request");
+          setErrorDialogVisible(true);
         }
       } catch (error) {
         console.error("Error cancelling request:", error);
         console.error("Error details:", JSON.stringify(error, null, 2));
-        window.alert(
+        setErrorMessage(
           `Failed to cancel request: ${
             error instanceof Error ? error.message : "Unknown error"
           }`
         );
+        setErrorDialogVisible(true);
       }
     }
   };
@@ -196,42 +206,33 @@ export default function UserAppointments() {
           // Close modal if open
           setDetailsModalVisible(false);
 
-          window.alert("Request marked as completed successfully");
+          setSuccessMessage("Request marked as completed successfully");
+          setSuccessDialogVisible(true);
           // Refresh the list
           await refetch();
         } else {
-          window.alert(
-            `Error: ${response.message || "Failed to mark request as complete"}`
-          );
+          setErrorMessage(response.message || "Failed to mark request as complete");
+          setErrorDialogVisible(true);
         }
       } catch (error) {
         console.error("Error marking request as complete:", error);
         console.error("Error details:", JSON.stringify(error, null, 2));
-        window.alert(
+        setErrorMessage(
           `Failed to mark request as complete: ${
             error instanceof Error ? error.message : "Unknown error"
           }`
         );
+        setErrorDialogVisible(true);
       }
     }
   };
 
-  const renderTabButton = (tab: StatusTab, label: string) => (
-    <TouchableOpacity
-      key={tab}
-      style={[styles.tabButton, activeTab === tab && styles.activeTabButton]}
-      onPress={() => setActiveTab(tab)}
-    >
-      <Text
-        style={[
-          styles.tabButtonText,
-          activeTab === tab && styles.activeTabButtonText,
-        ]}
-      >
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
+  const tabs = [
+    { key: 'accepted' as StatusTab, label: 'Upcoming' },
+    { key: 'pending' as StatusTab, label: 'Pending' },
+    { key: 'completed' as StatusTab, label: 'Completed' },
+    { key: 'cancelled' as StatusTab, label: 'Cancelled' },
+  ];
 
   const renderRequestCard = (request: any) => {
     const status = request.status as BloodRequestStatus;
@@ -279,18 +280,8 @@ export default function UserAppointments() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Blood Requests</Text>
-
-        {/* Tab Buttons */}
-        <View style={styles.tabContainer}>
-          {renderTabButton("accepted", "Upcoming")}
-          {renderTabButton("pending", "Pending")}
-          {renderTabButton("completed", "Completed")}
-          {renderTabButton("cancelled", "Cancelled")}
-        </View>
-      </View>
+      {/* Tab Buttons */}
+      <StatusTabs activeTab={activeTab} onTabChange={setActiveTab} tabs={tabs} />
 
       {/* Request List */}
       <ScrollView
@@ -352,6 +343,20 @@ export default function UserAppointments() {
           />
         )}
       </Modal>
+
+      {/* Error Dialog */}
+      <ErrorDialog
+        visible={errorDialogVisible}
+        message={errorMessage}
+        onClose={() => setErrorDialogVisible(false)}
+      />
+
+      {/* Success Dialog */}
+      <SuccessDialog
+        visible={successDialogVisible}
+        message={successMessage}
+        onClose={() => setSuccessDialogVisible(false)}
+      />
     </View>
   );
 }
@@ -360,44 +365,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F5F5F5",
-  },
-  header: {
-    backgroundColor: "#fff",
-    paddingTop: 50,
-    paddingBottom: 16,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#222",
-    marginBottom: 20,
-  },
-  tabContainer: {
-    flexDirection: "row",
-    gap: 8,
-    justifyContent: "center",
-    width: "100%",
-  },
-  tabButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    backgroundColor: "#F5F5F5",
-  },
-  activeTabButton: {
-    backgroundColor: "#D32F2F",
-  },
-  tabButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#666",
-  },
-  activeTabButtonText: {
-    color: "#fff",
   },
   scrollView: {
     flex: 1,
