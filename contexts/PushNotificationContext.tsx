@@ -29,6 +29,7 @@ interface PushNotificationContextType {
     expoPushToken: string | null;
     deviceId: string | null;
     notification: Notifications.Notification | null;
+    refreshPushRegistration: () => Promise<void>;
 }
 
 export function PushNotificationProvider({ children }: { children: React.ReactNode }) {
@@ -81,6 +82,10 @@ export function PushNotificationProvider({ children }: { children: React.ReactNo
         } catch (error) {
             console.error('Error initializing push notifications:', error);
         }
+    };
+
+    const refreshPushRegistration = async () => {
+        await initializePushNotifications();
     };
 
     const getOrCreateDeviceId = async (): Promise<string> => {
@@ -271,6 +276,7 @@ export function PushNotificationProvider({ children }: { children: React.ReactNo
         expoPushToken,
         deviceId,
         notification,
+        refreshPushRegistration,
     };
 
     return (
@@ -295,24 +301,6 @@ function formatHashAsUUID(hashHex: string): string {
 
     // Format as UUID: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
     return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(12, 15)}-a${hex.slice(15, 18)}-${hex.slice(18, 30)}`;
-}
-
-function hashString(str: string): number {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32-bit integer
-    }
-    return Math.abs(hash);
-}
-
-function formatAsUUID(hash: number): string {
-    // Convert hash to hex and pad
-    const hex = hash.toString(16).padStart(32, '0');
-
-    // Format as UUID: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
-    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-a${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
 }
 
 function generateUUID(): string {

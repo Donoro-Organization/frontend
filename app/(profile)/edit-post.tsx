@@ -111,6 +111,12 @@ export default function EditPostScreen() {
             // If there are images to delete or upload, start tracking
             if (imagesToDelete.length > 0 || newImages.length > 0) {
                 const totalOperations = imagesToDelete.length + newImages.length;
+
+                // Set is_uploading to true
+                await apiCall(`/posts/${post.id}/toggle-upload?enable=true`, {
+                    method: 'PATCH',
+                });
+
                 // Start upload tracking
                 startUpload(post.id, totalOperations, true);
 
@@ -204,10 +210,25 @@ export default function EditPostScreen() {
                 }
             }
 
+            // Set is_uploading to false
+            await apiCall(`/posts/${postId}/toggle-upload?enable=false`, {
+                method: 'PATCH',
+            });
+
             // Complete upload
             completeUpload(postId);
         } catch (error) {
             console.error('Background image processing failed:', error);
+
+            // Set is_uploading to false even on error
+            try {
+                await apiCall(`/posts/${postId}/toggle-upload?enable=false`, {
+                    method: 'PATCH',
+                });
+            } catch (e) {
+                console.error('Failed to set is_uploading to false:', e);
+            }
+
             failUpload(postId);
         }
     };

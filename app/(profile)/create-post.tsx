@@ -83,6 +83,11 @@ export default function CreatePostScreen() {
 
             // If there are images, start upload tracking and navigate back immediately
             if (selectedImages.length > 0 && postId) {
+                // Set is_uploading to true
+                await apiCall(`/posts/${postId}/toggle-upload?enable=true`, {
+                    method: 'PATCH',
+                });
+
                 // Start tracking upload
                 console.log('Starting upload tracking for post:', postId);
                 startUpload(postId, selectedImages.length);
@@ -174,10 +179,26 @@ export default function CreatePostScreen() {
             }
 
             console.log('All images uploaded, marking as complete');
+            
+            // Set is_uploading to false
+            await apiCall(`/posts/${postId}/toggle-upload?enable=false`, {
+                method: 'PATCH',
+            });
+
             // Mark upload as complete
             completeUpload(postId);
         } catch (error) {
             console.error('Failed to upload images:', error);
+            
+            // Set is_uploading to false even on error
+            try {
+                await apiCall(`/posts/${postId}/toggle-upload?enable=false`, {
+                    method: 'PATCH',
+                });
+            } catch (e) {
+                console.error('Failed to set is_uploading to false:', e);
+            }
+            
             failUpload(postId);
         }
     };
@@ -230,6 +251,21 @@ export default function CreatePostScreen() {
                     />
                 </View>
 
+                <View style={styles.locationContainer}>
+                    <View style={styles.locationHeader}>
+                        <Feather name="map-pin" size={20} color="#D32F2F" />
+                        <Text style={styles.locationLabel}>Location (Optional)</Text>
+                    </View>
+                    <TextInput
+                        style={styles.locationInput}
+                        placeholder="Where are you?"
+                        placeholderTextColor="#999"
+                        value={location}
+                        onChangeText={setLocation}
+                        editable={!isSubmitting}
+                    />
+                </View>
+
                 {/* Image Selection */}
                 {selectedImages.length > 0 && (
                     <View style={styles.imagesContainer}>
@@ -261,21 +297,6 @@ export default function CreatePostScreen() {
                         {selectedImages.length >= 5 ? 'Maximum 5 images' : `Add Photos (${selectedImages.length}/5)`}
                     </Text>
                 </TouchableOpacity>
-
-                <View style={styles.locationContainer}>
-                    <View style={styles.locationHeader}>
-                        <Feather name="map-pin" size={20} color="#D32F2F" />
-                        <Text style={styles.locationLabel}>Location (Optional)</Text>
-                    </View>
-                    <TextInput
-                        style={styles.locationInput}
-                        placeholder="Where are you?"
-                        placeholderTextColor="#999"
-                        value={location}
-                        onChangeText={setLocation}
-                        editable={!isSubmitting}
-                    />
-                </View>
 
                 <View style={styles.tipsContainer}>
                     <Text style={styles.tipsTitle}>Tips for a great post:</Text>
@@ -310,6 +331,7 @@ const styles = StyleSheet.create({
     postButtonLabel: {
         fontSize: 14,
         fontWeight: '600',
+        color: '#FFF',
     },
     inputContainer: {
         backgroundColor: '#FFF',

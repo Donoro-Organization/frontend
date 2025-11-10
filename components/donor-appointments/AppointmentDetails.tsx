@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'rea
 import { Ionicons } from '@expo/vector-icons';
 import { DonorInvitation, InvitationStatus } from '@/types/bloodRequest';
 import { format } from 'date-fns';
-import DetailsButton from './DetailsButton';
+import DetailsButton from '../DetailsButton';
 
 interface AppointmentDetailsProps {
     invitation: DonorInvitation;
@@ -178,7 +178,7 @@ export default function AppointmentDetails({
                     <View style={styles.hospitalInfo}>
                         <Text style={styles.hospitalName}>{bloodRequest.location}</Text>
                         <Text style={styles.hospitalAddress}>
-                            Dhanmondi, Dhaka
+                            {bloodRequest.address || 'Not specified'}
                         </Text>
                     </View>
                     <Ionicons name="chevron-forward" size={24} color="#D32F2F" />

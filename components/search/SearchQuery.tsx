@@ -153,7 +153,7 @@ export default function SearchQuery({
                 {/* Location Picker - Integrated */}
                 <View style={styles.section}>
                     <Text variant="titleMedium" style={styles.label}>
-                        Location
+                        Hospital Location
                     </Text>
                     <Text variant="bodySmall" style={styles.helperText}>
                         {formData.location

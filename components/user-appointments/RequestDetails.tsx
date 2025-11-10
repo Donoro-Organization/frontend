@@ -100,11 +100,20 @@ export default function RequestDetails({
                 {/* Hospital Location */}
                 <View style={styles.infoRow}>
                     <View style={styles.iconContainer}>
+                        <Ionicons name="business" size={24} color="#D32F2F" />
+                    </View>
+                    <View style={styles.infoContent}>
+                        <Text style={styles.infoLabel}>Hospital Name</Text>
+                        <Text style={styles.infoValue}>{request.location}</Text>
+                    </View>
+                </View>
+                <View style={styles.infoRow}>
+                    <View style={styles.iconContainer}>
                         <Ionicons name="location" size={24} color="#D32F2F" />
                     </View>
                     <View style={styles.infoContent}>
-                        <Text style={styles.infoLabel}>Hospital Location</Text>
-                        <Text style={styles.infoValue}>{request.location}</Text>
+                        <Text style={styles.infoLabel}>Hospital Address</Text>
+                        <Text style={styles.infoValue}>{request.address}</Text>
                     </View>
                 </View>
 

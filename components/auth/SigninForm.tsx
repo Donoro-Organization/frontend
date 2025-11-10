@@ -64,7 +64,7 @@ export default function SigninForm({ onSigninSuccess, onSigninError }: SigninFor
                     response.access_token
                 );
 
-                // Call success callback
+                // Call success callback (fire-and-forget)
                 onSigninSuccess();
             }
         } catch (err) {

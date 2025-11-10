@@ -141,8 +141,10 @@ export default function UserProfile({ user, isOwnProfile }: UserProfileProps) {
     console.log('Uploading posts:', uploadingPosts.size);
     console.log('Regular posts:', posts.length);
 
-    // Filter out posts that are currently being uploaded from regular posts
+    // Get set of uploading post IDs to filter them out from regular posts
     const uploadingPostIds = new Set(Array.from(uploadingPosts.keys()));
+    
+    // Filter out posts that are currently uploading
     const filteredPosts = posts.filter(post => !uploadingPostIds.has(post.id));
 
     // Show uploading posts, pending posts, and actual posts

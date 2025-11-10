@@ -117,8 +117,10 @@ export default function EditProfile({ user, donorData, onSave }: EditProfileProp
 
             if (!result.canceled && result.assets[0]) {
                 const imageUri = result.assets[0].uri;
+                // Update image immediately
                 setProfileImageUri(imageUri);
-                await uploadProfileImage(imageUri);
+                // Upload in background (fire and forget)
+                uploadProfileImage(imageUri);
             }
         } catch (error) {
             console.error('Error picking image:', error);
@@ -128,7 +130,6 @@ export default function EditProfile({ user, donorData, onSave }: EditProfileProp
     };
 
     const uploadProfileImage = async (imageUri: string) => {
-        setUploadingImage(true);
         try {
             // Create FormData
             const formData = new FormData();
@@ -144,27 +145,18 @@ export default function EditProfile({ user, donorData, onSave }: EditProfileProp
                 name: `profile.${fileExtension}`,
             } as any);
 
-            // Upload to API
-            const result = await apiCall('/users/profile/image', {
+            // Upload to API in background
+            await apiCall('/users/profile/image', {
                 method: 'PUT',
                 body: formData,
                 requiresAuth: true,
             });
 
-            if (result.status_code === 200) {
-                setSuccessMessage('Profile image updated successfully');
-                setShowSuccess(true);
-            } else {
-                throw new Error(result.message || 'Failed to upload image');
-            }
+            // Upload completed successfully (silently, user already saw success message)
         } catch (error) {
+            // Log error but don't show to user (upload happens in background)
             console.error('Error uploading profile image:', error);
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to upload image');
-            setShowError(true);
-            // Revert image on error
-            setProfileImageUri(user.profile_image?.url);
-        } finally {
-            setUploadingImage(false);
+            // Optionally show error after a delay if needed
         }
     };
 
@@ -310,24 +302,18 @@ export default function EditProfile({ user, donorData, onSave }: EditProfileProp
                                 <Ionicons name="person" size={60} color="#999" />
                             </View>
                         )}
-                        {uploadingImage && (
-                            <View style={styles.imageLoadingOverlay}>
-                                <ActivityIndicator size="large" color="#C62828" />
-                            </View>
-                        )}
                     </View>
                     <View style={styles.imageButtons}>
                         <TouchableOpacity
                             style={styles.imageButton}
                             onPress={handlePickImage}
-                            disabled={uploadingImage}
                         >
                             <Ionicons name="camera" size={20} color="#C62828" />
                             <Text style={styles.imageButtonText}>Change Photo</Text>
                         </TouchableOpacity>
                         {profileImageUri && (
                             <TouchableOpacity
-                                style={[styles.imageButton, styles.deleteImageButton]}
+                                style={styles.imageButton}
                                 onPress={handleDeleteImage}
                                 disabled={uploadingImage}
                             >
@@ -346,6 +332,7 @@ export default function EditProfile({ user, donorData, onSave }: EditProfileProp
                     <TextInput
                         style={styles.input}
                         placeholder="Enter your first name"
+                        placeholderTextColor="#999"
                         value={formData.first_name}
                         onChangeText={(text) => setFormData({ ...formData, first_name: text })}
                     />
@@ -354,6 +341,7 @@ export default function EditProfile({ user, donorData, onSave }: EditProfileProp
                     <TextInput
                         style={styles.input}
                         placeholder="Enter your last name"
+                        placeholderTextColor="#999"
                         value={formData.last_name}
                         onChangeText={(text) => setFormData({ ...formData, last_name: text })}
                     />
@@ -362,6 +350,7 @@ export default function EditProfile({ user, donorData, onSave }: EditProfileProp
                     <TextInput
                         style={[styles.input, styles.bioInput]}
                         placeholder="Tell us about yourself"
+                        placeholderTextColor="#999"
                         value={formData.bio}
                         onChangeText={(text) => setFormData({ ...formData, bio: text })}
                         multiline
@@ -373,6 +362,7 @@ export default function EditProfile({ user, donorData, onSave }: EditProfileProp
                     <TextInput
                         style={styles.input}
                         placeholder="Enter your phone number"
+                        placeholderTextColor="#999"
                         value={formData.phone}
                         onChangeText={(text) => setFormData({ ...formData, phone: text })}
                         keyboardType="phone-pad"
@@ -411,6 +401,7 @@ export default function EditProfile({ user, donorData, onSave }: EditProfileProp
                         <TextInput
                             style={styles.input}
                             placeholder="YYYY-MM-DD"
+                            placeholderTextColor="#999"
                             value={formData.birth_date}
                             onChangeText={(text) => setFormData({ ...formData, birth_date: text })}
                             // @ts-ignore - type prop exists on web
@@ -476,6 +467,7 @@ export default function EditProfile({ user, donorData, onSave }: EditProfileProp
                             <TextInput
                                 style={styles.input}
                                 placeholder="YYYY-MM-DD"
+                                placeholderTextColor="#999"
                                 value={formData.last_donation_date}
                                 onChangeText={(text) =>
                                     setFormData({ ...formData, last_donation_date: text })
@@ -528,6 +520,7 @@ export default function EditProfile({ user, donorData, onSave }: EditProfileProp
                         <TextInput
                             style={styles.input}
                             placeholder="Enter your NID number"
+                            placeholderTextColor="#999"
                             value={formData.nid_number}
                             onChangeText={(text) => setFormData({ ...formData, nid_number: text })}
                             keyboardType="numeric"
@@ -658,9 +651,6 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: '#C62828',
-    },
-    deleteImageButton: {
-        borderColor: '#999',
     },
     imageButtonText: {
         fontSize: 14,

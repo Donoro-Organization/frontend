@@ -61,11 +61,20 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     }, []);
 
     // WebSocket connection
-    const { isConnected } = useWebSocket({
+    const { isConnected, reconnect, disconnect } = useWebSocket({
         onMessage: handleNewNotification,
         onConnect: () => console.log('✅ Notification WebSocket connected'),
         onDisconnect: () => console.log('🔌 Notification WebSocket disconnected'),
     });
+
+    // Simple refresh function to get a fresh socket after sign-in
+    const refreshConnection = useCallback(() => {
+        try {
+            reconnect();
+        } catch (error) {
+            console.error('Error refreshing WebSocket connection:', error);
+        }
+    }, [reconnect]);
 
     const markAsRead = useCallback(async (id: string) => {
         setNotifications((prev) => {
@@ -148,6 +157,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         markAllAsRead,
         clearNotifications,
         refetchNotifications,
+        refreshConnection,
     };
 
     return (

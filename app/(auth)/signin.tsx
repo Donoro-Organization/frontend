@@ -1,17 +1,18 @@
 import { AntDesign, Feather, FontAwesome } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, ActivityIndicator, ScrollView } from 'react-native';
 import SigninForm from '../../components/auth/SigninForm';
 import config from '../../config/config';
 import { useGoogleAuth, getGoogleUserInfo } from '../../utils/googleAuth';
 import { useFacebookAuth, getFacebookUserInfo } from '../../utils/facebookAuth';
 import { apiCall } from '@/hooks/useAPI';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import ErrorDialog from '../../components/ErrorDialog';
 import { saveUserData } from '@/utils/storage';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNotifications } from '@/contexts/NotificationContext';
+import { usePushNotifications } from '@/contexts/PushNotificationContext';
 
 export default function SigninPage() {
     const [serverError, setServerError] = useState<string | null>(null);
@@ -23,6 +24,8 @@ export default function SigninPage() {
     const { activeOAuthProvider, setActiveOAuthProvider, setAuthMode } = useAuth();
     const { promptAsync, response } = useGoogleAuth();
     const { promptAsync: facebookPromptAsync, response: facebookResponse } = useFacebookAuth();
+    const { refreshConnection } = useNotifications();
+    const { refreshPushRegistration } = usePushNotifications();
 
     // Set authMode to signin when component mounts
     useEffect(() => {
@@ -65,6 +68,19 @@ export default function SigninPage() {
         }
     }, [facebookResponse]);
 
+    const postSigninActions = useCallback(() => {
+        try {
+            refreshConnection();
+            refreshPushRegistration().catch((error) => {
+                console.error('Error refreshing push registration after signin:', error);
+            });
+        } catch (error) {
+            console.error('Error scheduling notification refresh after signin:', error);
+        }
+
+        router.push('/dev-menu');
+    }, [refreshConnection, refreshPushRegistration, router]);
+
     const handleGoogleSignin = async (accessToken: string) => {
         try {
             setIsGoogleLoading(true);
@@ -96,7 +112,7 @@ export default function SigninPage() {
                     response.access_token
                 );
 
-                router.push('/dev-menu');
+                postSigninActions();
             } else {
                 throw new Error('Sign in failed');
             }
@@ -143,7 +159,7 @@ export default function SigninPage() {
                     response.access_token
                 );
 
-                router.push('/dev-menu');
+                postSigninActions();
             } else {
                 throw new Error('Sign in failed');
             }
@@ -186,7 +202,7 @@ export default function SigninPage() {
     };
 
     const handleSigninSuccess = () => {
-        router.push('/dev-menu');
+        postSigninActions();
     };
 
     const handleSigninError = (error: string) => {

@@ -26,6 +26,7 @@ export interface NotificationContextType {
   markAllAsRead: () => void;
   clearNotifications: () => void;
   refetchNotifications: () => Promise<void>;
+  refreshConnection: () => void;
 }
 
 // Icon mapping for notification categories

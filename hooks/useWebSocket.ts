@@ -18,6 +18,11 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     null
   );
   const pingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Close intent controls what to do in onclose:
+  // - "none": unexpected close → auto backoff reconnect
+  // - "refresh": intentional one-shot reconnect
+  // - "disconnect": intentional full stop
+  const closeIntentRef = useRef<"none" | "refresh" | "disconnect">("none");
 
   const connect = useCallback(async () => {
     try {
@@ -25,11 +30,6 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       if (!token) {
         console.log("No auth token available for WebSocket");
         return;
-      }
-
-      // Close existing connection if any
-      if (wsRef.current) {
-        wsRef.current.close();
       }
 
       const wsUrl = `${config.BACKEND_SOCKET_ENDPOINT}/notifications/ws?token=${token}`;
@@ -79,10 +79,26 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         setIsConnected(false);
         options.onDisconnect?.();
 
+        wsRef.current = null;
+
         // Clear ping interval
         if (pingIntervalRef.current) {
           clearInterval(pingIntervalRef.current);
           pingIntervalRef.current = null;
+        }
+
+        // Decide next action based on close intent
+        const intent = closeIntentRef.current;
+        // Reset intent to default for future closes
+        closeIntentRef.current = "none";
+        if (intent === "disconnect") {
+          // Do nothing further
+          return;
+        }
+        if (intent === "refresh") {
+          // One-shot reconnect
+          connect();
+          return;
         }
 
         // Attempt to reconnect
@@ -112,10 +128,9 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   }, [reconnectAttempts, options]);
 
   const disconnect = useCallback(() => {
-    if (wsRef.current) {
-      wsRef.current.close();
-      wsRef.current = null;
-    }
+    // Prevent retries on this close
+    closeIntentRef.current = "disconnect";
+    // Clear pending timers/intervals
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
@@ -124,7 +139,30 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       clearInterval(pingIntervalRef.current);
       pingIntervalRef.current = null;
     }
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
   }, []);
+
+  const refresh = useCallback(() => {
+    // Request a one-shot reconnect
+    closeIntentRef.current = "refresh";
+    // Clear pending timers/intervals for a clean slate
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+    if (pingIntervalRef.current) {
+      clearInterval(pingIntervalRef.current);
+      pingIntervalRef.current = null;
+    }
+    if (wsRef.current) {
+      wsRef.current.close();
+    } else {
+      connect();
+    }
+  }, [connect]);
 
   useEffect(() => {
     connect();
@@ -136,7 +174,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
 
   return {
     isConnected,
-    reconnect: connect,
+    reconnect: refresh,
     disconnect,
   };
 }

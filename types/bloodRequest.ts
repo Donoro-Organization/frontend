@@ -33,6 +33,7 @@ export interface BloodRequest {
   blood_group: BloodGroup;
   patient_condition?: string;
   location: string;
+  address: string;
   latitude: string;
   longitude: string;
   required_datetime: string;
@@ -68,17 +69,6 @@ export interface PaginatedInvitationsResponse {
   total_pages: number;
 }
 
-// Request types for creating blood requests
-export interface BloodRequestCreateRequest {
-  blood_group: BloodGroup;
-  patient_condition?: string;
-  location: string;
-  latitude: string;
-  longitude: string;
-  required_datetime: string; // ISO format
-  quantity?: number;
-}
-
 export interface BulkDonorInvitationItemRequest {
   donor_id: string;
   notes?: string;
@@ -94,6 +84,7 @@ export interface BloodRequestCreateRequest {
   blood_group: BloodGroup;
   patient_condition?: string;
   location: string;
+  address: string;
   latitude: string;
   longitude: string;
   required_datetime: string; // ISO format

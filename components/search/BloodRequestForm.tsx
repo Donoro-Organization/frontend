@@ -131,7 +131,8 @@ export default function BloodRequestForm({
             const bloodRequest: BloodRequestCreateRequest = {
                 blood_group: searchFormData.bloodGroup as BloodGroup,
                 patient_condition: finalPatientCondition,
-                location: searchFormData.location.address || searchFormData.location.name,
+                location: searchFormData.location.name,
+                address: searchFormData.location.address || "Not specified",
                 latitude: searchFormData.location.latitude.toString(),
                 longitude: searchFormData.location.longitude.toString(),
                 required_datetime: searchFormData.requiredDate.toISOString(),
@@ -243,7 +244,15 @@ export default function BloodRequestForm({
                         </View>
                         <View style={styles.summaryRow}>
                             <Text variant="bodyMedium" style={styles.summaryLabel}>
-                                Location:
+                                Hospital Name:
+                            </Text>
+                            <Text variant="bodyMedium" style={styles.summaryValue}>
+                                {searchFormData.location?.name || "Not specified"}
+                            </Text>
+                        </View>
+                        <View style={styles.summaryRow}>
+                            <Text variant="bodyMedium" style={styles.summaryLabel}>
+                                Address:
                             </Text>
                             <Text variant="bodyMedium" style={styles.summaryValue}>
                                 {searchFormData.location?.address || "Not specified"}
